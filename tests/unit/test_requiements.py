@@ -8,10 +8,16 @@ class RequirementsTest(unittest.TestCase):
 
 
     def test_function(self):
-        f = io.StringIO("backports.zoneinfo >= 0.1")
-        s = atc_tools.requirements.manipulate_file(f)
+        freeze = atc_tools.requirements.freeze_req(
+            """
+            backports.zoneinfo >= 0.1
+            
+            # comment here
+            pytest
+            """
+        )
+        deps = {s.strip().split("==")[0]:s.strip().split("==")[1] for s in freeze.splitlines() }
 
-        parts = s.strip().split("==")
-        self.assertEqual(2,len(parts))
-        self.assertEqual("backports.zoneinfo",parts[0])
-        self.assertRegex(parts[1],r"\d+\.\d+\.\d+")
+        self.assertIn('backports.zoneinfo', deps)
+        self.assertIn('pytest', deps)
+        self.assertIn('iniconfig', deps)
