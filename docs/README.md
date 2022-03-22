@@ -20,4 +20,4 @@ a command line tool for doing this:
 $> atc_dp_tools_update_req_file requirements.txt
 ```
 
-will manipulate the file `requirements.txt` in place to update the versions.
+will output the freeze version for all libraries specified in the file.
