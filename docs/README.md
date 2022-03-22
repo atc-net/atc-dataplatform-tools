@@ -20,4 +20,14 @@ a command line tool for doing this:
 $> atc_dp_tools_update_req_file requirements.txt
 ```
 
-will output the freeze version for all libraries specified in the file.
+will output the freeze version for all libraries that are installed directly,
+or as a dependency of the libraries specified in `requirements.txt`.
+The recommended usecase is to output this list of libarries to a freeze file
+such as 
+
+```
+$> atc_dp_tools_update_req_file requirements.txt > requirements_freeze.txt
+```
+
+and then use the freeze file when installing your product. You can always 
+update your libraries by rerunning this last command.
