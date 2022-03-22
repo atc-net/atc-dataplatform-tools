@@ -20,7 +20,7 @@ def manipulate_file(req_file:io.TextIOBase):
         line = line.split("#")[0].strip()
         if not line: continue
 
-        library = re.match(r"[\w\d-]+",line)
+        library = re.match(r"[\w\d.-]+",line)
         if not library:
             raise Exception(f"Line {line} cannot be parsed.")
         library = library.group(0)
