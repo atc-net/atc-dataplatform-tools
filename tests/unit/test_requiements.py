@@ -16,7 +16,7 @@ class RequirementsTest(unittest.TestCase):
             pytest
             """
         )
-        deps = {s.strip().split("==")[0]:s.strip().split("==")[1] for s in freeze.splitlines() }
+        deps = {lib['name']:lib['version'] for lib in freeze }
 
         self.assertIn('backports.zoneinfo', deps)
         self.assertIn('pytest', deps)
