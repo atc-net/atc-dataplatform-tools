@@ -34,9 +34,18 @@ def main():
         help="The output to file.",
     )
     parser.add_argument("--cfg", action="store_const", const=True, default=False)
-    parser.add_argument("--cfg-file", type=str, default="setup.cfg", dest="cfg_file")
     parser.add_argument(
-        "--reject", type=str, default="pip|pywin32", help="regex to exclude"
+        "--cfg-file",
+        type=str,
+        default="setup.cfg",
+        dest="cfg_file",
+        help="specify your configuration file if it differs from setup.cfg",
+    )
+    parser.add_argument(
+        "--reject",
+        type=str,
+        default="pip|pywin32",
+        help="regex to exclude. Default: pip|pywin32",
     )
     args = parser.parse_args()
 
@@ -74,7 +83,9 @@ def main():
         print("\n".join(f"{lib['name']}=={lib['version']}" for lib in freeze))
 
 
-def freeze_req(requirements: str, reject:str='', debug_out: TextIOBase = sys.stdout) -> List[LibType]:
+def freeze_req(
+    requirements: str, reject: str = "", debug_out: TextIOBase = sys.stdout
+) -> List[LibType]:
 
     pat = re.compile(reject)
 
