@@ -18,6 +18,10 @@ def main():
     parser.add_argument(
         "--workspaceUrl", help="directly set .databrickscfg if this is given"
     )
+    # help="debug printing"
+    parser.add_argument(
+        "-v","--verbose", action="store_true", help=argparse.SUPPRESS
+    )
 
     args = parser.parse_args()
 
@@ -35,6 +39,7 @@ def main():
         auth_code=results.auth_code,
         state=results.state,
         redirect_uri=results.redirect_uri,
+        verbose=args.verbose
     )
 
     if args.workspaceUrl:
