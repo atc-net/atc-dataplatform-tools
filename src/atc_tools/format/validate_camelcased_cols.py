@@ -3,7 +3,7 @@ from pyspark.sql import DataFrame
 import re
 
 
-def ValidateCamelCasedCols(
+def validate_camelcased_cols(
     df: DataFrame, cols_to_check: List[str] = None, print_result: bool = False
 ):
     """

@@ -10,7 +10,7 @@ The algorithm is simple, where the following must hold:
 ```python
         from pyspark.sql.types import StructType, StructField, StringType
         from atc.spark import Spark
-        from atc_tools.format.CheckCamelCase import ValidateCamelCasedCols
+        from atc_tools.format.validate_camelcased_cols import validate_camelcased_cols
         data1 = [
             (None,),
         ]
@@ -23,7 +23,7 @@ The algorithm is simple, where the following must hold:
 
         df = Spark.get().createDataFrame(data=data1, schema=schema1)
 
-        ValidateCamelCasedCols(df)
+        validate_camelcased_cols(df)
 
         OUTPUT: True
 ```
