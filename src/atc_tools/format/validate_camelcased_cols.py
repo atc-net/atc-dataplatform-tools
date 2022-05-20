@@ -7,6 +7,7 @@ def validate_camelcased_cols(
     df: DataFrame, cols_to_check: List[str] = None, print_result: bool = False
 ):
     """
+    The function takes a dataframe and validates if all columns or a given subset of columns are camelCased.
 
     :param df: A pyspark dataframe
     :param cols_to_check: Optional, a subset of the columns in the dataframe to check.
