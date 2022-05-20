@@ -32,6 +32,10 @@ def validate_camelcased_cols(
 
     # Todo : print results
     if print_result:
-        print(f"The following columns is not camelCased: {results_col}")
+        print(
+            f"The following columns are not camelCased: {results_col}"
+            if any(results_col)
+            else "All tested columns are camelCased!"
+        )
 
     return check_passed

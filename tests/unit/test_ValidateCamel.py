@@ -140,7 +140,7 @@ class CamelCaseTest(unittest.TestCase):
         schema8 = StructType(
             [
                 StructField("colA", StringType(), True),
-                StructField("ColB", StringType(), True),
+                StructField("colB", StringType(), True),
             ]
         )
 
@@ -154,3 +154,22 @@ class CamelCaseTest(unittest.TestCase):
             str(the_exception),
             str(ValueError("Some of the columns to check is not in the dataframe.")),
         )
+
+    def test_09_can_print(self):
+        data9 = [
+            (None, None, None, None),
+        ]
+
+        schema9 = StructType(
+            [
+                StructField("camelCased", StringType(), True),
+                StructField("NotCamelCased", StringType(), True),
+                StructField("AlsoNotCamelCased", StringType(), True),
+                StructField("notCamelCasedEIther", StringType(), True),
+            ]
+        )
+
+        df = Spark.get().createDataFrame(data=data9, schema=schema9)
+
+        self.assertFalse(validate_camelcased_cols(df, print_result=True))
+        self.assertTrue(validate_camelcased_cols(df, ["camelCased"], print_result=True))
