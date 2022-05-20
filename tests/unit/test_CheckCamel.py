@@ -1,8 +1,7 @@
 import unittest
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from pyspark.sql.types import StructType, StructField, StringType
 from atc.spark import Spark
-
-from src.atc_tools.format.CheckCamelCase import DfIsCamel
+from src.atc_tools.format.CheckCamelCase import ValidateCamelCasedCols
 
 
 class CamelCaseTest(unittest.TestCase):
@@ -20,7 +19,7 @@ class CamelCaseTest(unittest.TestCase):
 
         df = Spark.get().createDataFrame(data=data1, schema=schema1)
 
-        self.assertTrue(DfIsCamel(df))
+        self.assertTrue(ValidateCamelCasedCols(df))
 
     def test_02_pass(self):
 
@@ -40,7 +39,7 @@ class CamelCaseTest(unittest.TestCase):
 
         df = Spark.get().createDataFrame(data=data2, schema=schema2)
 
-        self.assertTrue(DfIsCamel(df))
+        self.assertTrue(ValidateCamelCasedCols(df))
 
     def test_03_subset_pass(self):
 
@@ -60,7 +59,7 @@ class CamelCaseTest(unittest.TestCase):
 
         df = Spark.get().createDataFrame(data=data3, schema=schema3)
 
-        self.assertTrue(DfIsCamel(df, ["camelCased"]))
+        self.assertTrue(ValidateCamelCasedCols(df, ["camelCased"]))
 
     def test_04_no_pass(self):
 
@@ -81,7 +80,7 @@ class CamelCaseTest(unittest.TestCase):
         df = Spark.get().createDataFrame(data=data4, schema=schema4)
 
         self.assertFalse(
-            DfIsCamel(
+            ValidateCamelCasedCols(
                 df,
             )
         )
@@ -105,7 +104,7 @@ class CamelCaseTest(unittest.TestCase):
         df = Spark.get().createDataFrame(data=data5, schema=schema5)
 
         self.assertFalse(
-            DfIsCamel(
+            ValidateCamelCasedCols(
                 df,
             )
         )
@@ -128,7 +127,7 @@ class CamelCaseTest(unittest.TestCase):
 
         df = Spark.get().createDataFrame(data=data7, schema=schema7)
 
-        self.assertFalse(DfIsCamel(df, ["notCamelCAsed"]))
+        self.assertFalse(ValidateCamelCasedCols(df, ["notCamelCAsed"]))
 
     def test_08_valueerror(self):
         data8 = [
@@ -148,7 +147,7 @@ class CamelCaseTest(unittest.TestCase):
         df = Spark.get().createDataFrame(data=data8, schema=schema8)
 
         with self.assertRaises(ValueError) as cm:
-            DfIsCamel(df, ["colC"])
+            ValidateCamelCasedCols(df, ["colC"])
         the_exception = cm.exception
 
         self.assertEqual(
