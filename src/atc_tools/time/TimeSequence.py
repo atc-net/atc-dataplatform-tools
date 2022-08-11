@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone, date
+from datetime import datetime, timedelta, timezone
 from typing import Union
 
 import dateparser as dateparser
@@ -27,5 +27,3 @@ class TimeSequence:
 
     def __next__(self):
         return self.next()
-
-

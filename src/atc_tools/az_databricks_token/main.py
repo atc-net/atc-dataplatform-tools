@@ -1,10 +1,10 @@
 import argparse
 from pathlib import Path
 
+from atc_tools.az_databricks_token.get_ad_access_token import get_ad_access_token
 from atc_tools.az_databricks_token.get_impersonation_authorization_code import (
     get_impersonation_authorization_code,
 )
-from atc_tools.az_databricks_token.get_ad_access_token import get_ad_access_token
 
 
 def main():
@@ -19,9 +19,7 @@ def main():
         "--workspaceUrl", help="directly set .databrickscfg if this is given"
     )
     # help="debug printing"
-    parser.add_argument(
-        "-v","--verbose", action="store_true", help=argparse.SUPPRESS
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help=argparse.SUPPRESS)
 
     args = parser.parse_args()
 
@@ -39,7 +37,7 @@ def main():
         auth_code=results.auth_code,
         state=results.state,
         redirect_uri=results.redirect_uri,
-        verbose=args.verbose
+        verbose=args.verbose,
     )
 
     if args.workspaceUrl:

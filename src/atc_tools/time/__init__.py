@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, date
+from datetime import date, datetime, timezone
 
 from .TimeSequence import TimeSequence  # noqa: F401
 

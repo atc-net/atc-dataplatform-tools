@@ -26,11 +26,10 @@ class LocalRequestHandler(BaseHTTPRequestHandler):
             )
         )
 
-
     def log_message(self, format, *args):
         """We don't want the output that someone connected to us,
         because the query contains a secret"""
-        print("Callback received.",file=sys.stderr)
+        print("Callback received.", file=sys.stderr)
 
 
 class LocalServer(HTTPServer):

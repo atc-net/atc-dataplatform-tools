@@ -1,9 +1,9 @@
 import datetime
-from typing import Iterable, Any
 import unittest
+from typing import Any, Iterable
 
 from pyspark.sql import DataFrame
-from pyspark.sql.types import ArrayType, StructType, StructField
+from pyspark.sql.types import ArrayType, StructField, StructType
 
 
 class DataframeTestCase(unittest.TestCase):
