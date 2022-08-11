@@ -1,6 +1,8 @@
 import unittest
-from pyspark.sql.types import StructType, StructField, StringType
+
 from atc.spark import Spark
+from pyspark.sql.types import StringType, StructField, StructType
+
 from src.atc_tools.format.validate_camelcased_cols import validate_camelcased_cols
 
 

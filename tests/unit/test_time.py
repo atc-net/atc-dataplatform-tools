@@ -12,6 +12,5 @@ class TimeTest(unittest.TestCase):
         t3 = next(seq)
         t4 = seq.reverse(2)
 
-        self.assertEqual(t4,t1)
-        self.assertEqual((t3-t2).total_seconds(), 3600)
-
+        self.assertEqual(t4, t1)
+        self.assertEqual((t3 - t2).total_seconds(), 3600)

@@ -39,7 +39,7 @@ def get_test_pypi_version():
         )
         test_pypi_version = parse(test_pypi["info"]["version"])
         return test_pypi_version
-    except:
+    except:  # noqa: E722  # bare except is fine in this simple case
         return parse("0.0.0")
 
 

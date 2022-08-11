@@ -1,8 +1,8 @@
 import sys
 from types import SimpleNamespace
 
-from atc_tools.az_databricks_token.server import LocalServer
 from atc_tools.az_databricks_token.AuthLinkOpener import AuthLinkOpener
+from atc_tools.az_databricks_token.server import LocalServer
 
 
 def get_impersonation_authorization_code(appId: str, tenantId: str):
