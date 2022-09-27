@@ -101,6 +101,8 @@ def freeze_req(
         if not Path(python).exists():
             python = str(Path(td) / "Scripts" / "python.exe")
 
+        run([python, "-m", "pip", "install", "--upgrade", "pip"], stdout=debug_out.buffer)
+
         run([python, "-m", "pip", "install", "-r", rf_path], stdout=debug_out.buffer)
 
         freeze_json = run(
