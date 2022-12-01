@@ -1,11 +1,9 @@
 import json
-import warnings
-from typing import Union
 
+import pyspark.sql.functions as f
+import pyspark.sql.types as t
 from atc.spark import Spark
 from pyspark.sql.dataframe import DataFrame
-import pyspark.sql.types as t
-import pyspark.sql.functions as f
 from pyspark.sql.types import StructType
 
 
