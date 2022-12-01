@@ -1,3 +1,5 @@
+from typing import List, Union
+
 from atc.tables.TableHandle import TableHandle
 from pyspark.sql import DataFrame
 
@@ -12,7 +14,6 @@ class TestHandle(TableHandle):
         self.dropped_and_deleted = False
         self.upserted = None
         self.upserted_join_cols = None
-
 
     def read(self) -> DataFrame:
         if self.provides is not None:

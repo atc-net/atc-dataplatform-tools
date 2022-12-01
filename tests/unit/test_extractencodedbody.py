@@ -3,14 +3,14 @@ import unittest
 
 from atc.spark import Spark
 from pyspark.sql.types import (
-    StructType,
-    StructField,
     BinaryType,
-    LongType,
     BooleanType,
-    StringType,
     DoubleType,
+    LongType,
     Row,
+    StringType,
+    StructField,
+    StructType,
 )
 
 from atc_tools.helpers.ExtractEncodedBody import ExtractEncodedBody
