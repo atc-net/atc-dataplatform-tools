@@ -10,6 +10,9 @@ class TestHandle(TableHandle):
         self.truncated = False
         self.dropped = False
         self.dropped_and_deleted = False
+        self.upserted = None
+        self.upserted_join_cols = None
+
 
     def read(self) -> DataFrame:
         if self.provides is not None:
@@ -31,3 +34,7 @@ class TestHandle(TableHandle):
 
     def drop_and_delete(self) -> None:
         self.dropped_and_deleted = True
+
+    def upsert(self, df: DataFrame, join_cols: List[str]) -> Union[DataFrame, None]:
+        self.upserted = df
+        self.upserted_join_cols = join_cols
