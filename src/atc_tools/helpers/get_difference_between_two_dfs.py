@@ -1,3 +1,5 @@
+import warnings
+
 from pyspark.sql import DataFrame
 from typing import List
 from pyspark.sql.functions import sha2, concat_ws
@@ -37,6 +39,20 @@ def get_difference_between_two_dfs(
 
     if ignore_cols is None:
         ignore_cols = []
+
+    if not all(elem in df2.columns for elem in df1.columns not in ignore_cols):
+        warnings.warn(
+            "Some of the columns in df1 is not in df2. The tables will therefore always be different!"
+            "Remember, this function only compares the columns that appear in both tables."
+            "Continuing..."
+        )
+
+    if not all(elem in df1.columns for elem in df2.columns not in ignore_cols):
+        warnings.warn(
+            "Some of the columns in df2 is not in df1. The tables will therefore always be different!"
+            "Remember, this function only compares the columns that appear in both tables."
+            "Continuing..."
+        )
 
     # Select same columns that appear in both tables. Without the ignore_cols.
     _cols = set(
