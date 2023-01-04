@@ -40,26 +40,30 @@ def get_difference_between_two_dfs(
     if ignore_cols is None:
         ignore_cols = []
 
-    if not all(elem in df2.columns for elem in df1.columns not in ignore_cols):
+    df1_cols_without_ignores = set(
+        [col.lower() for col in df1.columns if col.lower() not in ignore_cols]
+    )
+
+    df2_cols_without_ignores = set(
+        [col.lower() for col in df2.columns if col.lower() not in ignore_cols]
+    )
+
+    if not all(elem in df2_cols_without_ignores for elem in df1_cols_without_ignores):
         warnings.warn(
             "Some of the columns in df1 is not in df2. The tables will therefore always be different!"
-            "Remember, this function only compares the columns that appear in both tables."
+            "Remember, this function only compares the columns that appear in both tables.\n"
             "Continuing..."
         )
 
-    if not all(elem in df1.columns for elem in df2.columns not in ignore_cols):
+    if not all(elem in df1_cols_without_ignores for elem in df2_cols_without_ignores):
         warnings.warn(
             "Some of the columns in df2 is not in df1. The tables will therefore always be different!"
-            "Remember, this function only compares the columns that appear in both tables."
+            "Remember, this function only compares the columns that appear in both tables. \n"
             "Continuing..."
         )
 
     # Select same columns that appear in both tables. Without the ignore_cols.
-    _cols = set(
-        [col.lower() for col in df1.columns if col.lower() not in ignore_cols]
-    ) & set([col.lower() for col in df2.columns if col.lower() not in ignore_cols])
-
-    _cols = list(_cols)
+    _cols = list(df1_cols_without_ignores & df2_cols_without_ignores)
 
     # Generate hash columns
     df1_sub = df1.select(_cols).withColumn(
