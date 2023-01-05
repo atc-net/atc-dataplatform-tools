@@ -2,7 +2,6 @@ import warnings
 
 from pyspark.sql import DataFrame
 from typing import List
-from pyspark.sql.functions import sha2, concat_ws
 import pyspark.sql.functions as f
 from itertools import chain
 
@@ -48,16 +47,16 @@ def get_difference_between_two_dfs(
         [col.lower() for col in df2.columns if col.lower() not in ignore_cols]
     )
 
-    if not all(elem in df2_cols_without_ignores for elem in df1_cols_without_ignores):
+    if not df2_cols_without_ignores.issubset(df1_cols_without_ignores):
         warnings.warn(
-            "Some of the columns in df1 is not in df2. The tables will therefore always be different!"
+            "Some of the columns in df1 is not in df2. The tables will therefore always be different!\n"
             "Remember, this function only compares the columns that appear in both tables.\n"
             "Continuing..."
         )
 
-    if not all(elem in df1_cols_without_ignores for elem in df2_cols_without_ignores):
+    if not df1_cols_without_ignores.issubset(df2_cols_without_ignores):
         warnings.warn(
-            "Some of the columns in df2 is not in df1. The tables will therefore always be different!"
+            "Some of the columns in df2 is not in df1. The tables will therefore always be different!\n"
             "Remember, this function only compares the columns that appear in both tables. \n"
             "Continuing..."
         )
@@ -67,10 +66,10 @@ def get_difference_between_two_dfs(
 
     # Generate hash columns
     df1_sub = df1.select(_cols).withColumn(
-        "row_sha2", sha2(concat_ws("||", *_cols), 256)
+        "row_sha2", f.sha2(f.concat_ws("||", *_cols), 256)
     )
     df2_sub = df2.select(_cols).withColumn(
-        "row_sha2", sha2(concat_ws("||", *_cols), 256)
+        "row_sha2", f.sha2(f.concat_ws("||", *_cols), 256)
     )
 
     # Select the order as a.col1, b.col1, a.col2, b.col2.... this way it is easier to see differences.

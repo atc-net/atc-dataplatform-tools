@@ -1,4 +1,5 @@
 import unittest
+import warnings
 
 from atc.spark import Spark
 from pyspark.sql.types import StringType, StructField, StructType, IntegerType
@@ -36,6 +37,34 @@ class DifferenceBetweenTwoDfsTest(unittest.TestCase):
     )
 
     df2 = Spark.get().createDataFrame(data=data2, schema=schema2)
+
+    data3 = [
+        ("1", "Dummy", 1),
+    ]
+
+    schema3 = StructType(
+        [
+            StructField("Col1", StringType(), True),
+            StructField("OnlyInDf3", StringType(), True),
+            StructField("Col3", IntegerType(), True),
+        ]
+    )
+
+    df3 = Spark.get().createDataFrame(data=data3, schema=schema3)
+
+    data4 = [
+        ("1", "Dummy", 1),
+    ]
+
+    schema4 = StructType(
+        [
+            StructField("Col1", StringType(), True),
+            StructField("OnlyInDf4", StringType(), True),
+            StructField("Col3", IntegerType(), True),
+        ]
+    )
+
+    df4 = Spark.get().createDataFrame(data=data4, schema=schema4)
 
     def test_01a_all_match(self):
         """There should be no difference between df1 compared with itself."""
@@ -79,3 +108,17 @@ class DifferenceBetweenTwoDfsTest(unittest.TestCase):
                 self.df1, self.df2, join_cols=["col1"], ignore_cols=["col3"]
             ).count(),
         )
+
+    def test_04_warnings(self):
+        with warnings.catch_warnings(record=True) as warning_list:
+            get_difference_between_two_dfs(self.df3, self.df4, join_cols=["col1"])
+            print(warning_list[0].message)
+            self.assertIn(
+                "Some of the columns in df1 is not in df2",
+                str(warning_list[0].message),
+            )
+
+            self.assertIn(
+                "Some of the columns in df2 is not in df1",
+                str(warning_list[1].message),
+            )
