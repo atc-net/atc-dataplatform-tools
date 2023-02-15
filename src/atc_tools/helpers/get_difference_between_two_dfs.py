@@ -1,4 +1,5 @@
 import warnings
+from functools import reduce
 
 from pyspark.sql import DataFrame
 from typing import List
@@ -36,9 +37,15 @@ def get_difference_between_two_dfs(
 
     """
 
+    # Lowering join and ignore columns
+    join_cols = [col.lower() for col in join_cols]
+
     if ignore_cols is None:
         ignore_cols = []
+    else:
+        ignore_cols = [col.lower() for col in ignore_cols]
 
+    # Get columns without the ignored columns
     df1_cols_without_ignores = set(
         [col.lower() for col in df1.columns if col.lower() not in ignore_cols]
     )
@@ -84,11 +91,13 @@ def get_difference_between_two_dfs(
     order_list = list(chain.from_iterable(order_list))
 
     # Generating the differences
+    _join_cols_a = [f"a.{col}" for col in join_cols]
+
     df_res = (
         df1_sub.alias("a")
         .join(df2_sub.alias("b"), join_cols, "left")
         .filter("a.row_sha2 != b.row_sha2")
-        .select(*join_cols, *order_list)
+        .select(*_join_cols_a, *order_list)
     )
 
     if print_result:
