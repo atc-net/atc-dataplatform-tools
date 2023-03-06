@@ -110,6 +110,14 @@ def setup_submit_parser(subparsers):
         help="File with python dependencies, specified like for pip",
         default=None,
     )
+
+    parser.add_argument(
+        "--main-script",
+        type=argparse.FileType('r'),
+        help="Your own test_main.py script file, to add custom functionality.",
+        default=None
+    )
+
     return
 
 def collect_arguments(args):
@@ -149,6 +157,7 @@ def submit_main(args):
         requirement=args.requirement,
         sparklibs=args.sparklibs,
         out_json=args.out_json,
+        main_script=args.main_script
     )
 
 
@@ -208,12 +217,15 @@ def archive_and_push(test_path:str, test_folder: DbfsLocation):
 
     return f"{test_folder.local}/tests.zip"
 
-def push_main_file(test_folder: DbfsLocation)-> DbfsLocation:
+def push_main_file(test_folder: DbfsLocation, main_script:IO[str]=None)-> DbfsLocation:
     print('now pushing test main file')
     main_file = test_folder / 'main.py'
     with tempfile.TemporaryDirectory() as tmp:
         with open(Path(tmp) / "main.py", "w") as f:
-            f.write(inspect.getsource(test_main))
+            if main_script:
+                f.write(main_script.read())
+            else:
+                f.write(inspect.getsource(test_main))
 
         dbfscall(f"cp {tmp}/main.py {main_file.remote}")
 
@@ -227,6 +239,7 @@ def submit(
     requirement: List[str] = None,
     sparklibs: List[dict] = None,
     out_json: IO[str] = None,
+        main_script: IO[str]=None
 ):
     if requirement is None:
         requirement = []
@@ -249,7 +262,7 @@ def submit(
             sparklibs.append({"whl": wheel})
 
         archive_local = archive_and_push(test_path, test_folder)
-        main_file = push_main_file(test_folder)
+        main_file = push_main_file(test_folder,main_script)
 
         print(f"copied everything to {test_folder.remote}")
 
