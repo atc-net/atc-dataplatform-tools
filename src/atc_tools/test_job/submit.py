@@ -289,7 +289,7 @@ def submit(
                             f"--basedir={test_folder.local}/{task_sub}",
                             # all tests will be unpacked from here
                             f"--archive={archive_local}",
-                            # we can actually run any part of out test suite, but some files need the full repo.
+                            # we can actually run any part of our test suite, but some files need the full repo.
                             # Only run tests from this folder.
                             f"--folder={task}",
                         ],
