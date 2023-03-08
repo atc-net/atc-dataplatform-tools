@@ -195,7 +195,8 @@ class ExtractEncodedBodyTest(unittest.TestCase):
 
     def test_03_transform_df_w_schema_keep_original_fails(self):
         """Transform the dataframe, so the body is decoded using the extracted schema.
-        It should fail if we also want to keep the original since there will be name conflicts."""
+        It should fail if we also want to keep the original since there will be name conflicts.
+        """
 
         # Extracting the body
 

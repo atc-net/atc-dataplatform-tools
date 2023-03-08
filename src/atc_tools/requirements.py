@@ -86,7 +86,6 @@ def main():
 def freeze_req(
     requirements: str, reject: str = "", debug_out: TextIOBase = sys.stdout
 ) -> List[LibType]:
-
     pat = re.compile(reject)
 
     with tempfile.TemporaryDirectory() as td:
