@@ -1,5 +1,4 @@
 import warnings
-from functools import reduce
 from itertools import chain
 from typing import List
 
