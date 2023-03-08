@@ -12,8 +12,6 @@ import copy
 import datetime
 import inspect
 import json
-import subprocess
-import sys
 import tempfile
 import uuid
 
@@ -29,9 +27,14 @@ from .dbfs import DbfsLocation
 
 
 def setup_submit_parser(subparsers):
+    """
+    Adds a subparser for the command 'submit'.
+    :param subparsers: must be the object returned by ArgumentParser().add_subparsers()
+    :return:
+    """
+
     parser: argparse.ArgumentParser = subparsers.add_parser(
-        "submit",
-        description="Run Test Cases on databricks cluster."
+        "submit", description="Run Test Cases on databricks cluster."
     )
     parser.set_defaults(func=submit_main)
 
@@ -52,18 +55,13 @@ def setup_submit_parser(subparsers):
 
     parser.add_argument(
         "--folder",
-        type=str,
-        required=False,
-        default="",
         help="relative path of test folder in test archive to use in task discovery.",
     )
 
     parser.add_argument(
         "--out-json",
         type=argparse.FileType("w"),
-        required=False,
         help="File to store the RunID for future queries.",
-        default=None,
     )
 
     # cluster argument pair
@@ -72,28 +70,23 @@ def setup_submit_parser(subparsers):
         "--cluster",
         type=str,
         help="JSON document describing the cluster setup.",
-        default=None,
     )
     cluster.add_argument(
         "--cluster-file",
         type=argparse.FileType("r"),
         help="File with JSON document describing the cluster setup.",
-        default=None,
     )
 
     # spark libraries argument pair
     sparklibs = parser.add_mutually_exclusive_group(required=False)
     sparklibs.add_argument(
         "--sparklibs",
-        type=str,
         help="JSON document describing the spark dependencies.",
-        default=None,
     )
     sparklibs.add_argument(
         "--sparklibs-file",
         type=argparse.FileType("r"),
         help="File with JSON document describing the spark dependencies.",
-        default=None,
     )
 
     # python dependencies file
@@ -108,19 +101,28 @@ def setup_submit_parser(subparsers):
         "--requirements-file",
         type=argparse.FileType("r"),
         help="File with python dependencies, specified like for pip",
-        default=None,
     )
 
     parser.add_argument(
         "--main-script",
-        type=argparse.FileType('r'),
+        type=argparse.FileType("r"),
         help="Your own test_main.py script file, to add custom functionality.",
-        default=None
+    )
+
+    parser.add_argument(
+        "--pytest-args", help="Additional arguments to pass to pytest in each test job."
     )
 
     return
 
+
 def collect_arguments(args):
+    """
+    Post process the parsed arguments of the 'submit' command argument parser.
+    :param args: parsed arguments of the 'submit' command argument parser
+    :return:
+    """
+
     # pre-process 'cluster'
     if args.cluster_file:
         args.cluster = args.cluster_file.read()
@@ -140,11 +142,13 @@ def collect_arguments(args):
             if l.strip() and not l.strip().startswith("#")
         ]
 
+    args.pytest_args = (args.pytest_args or "").split()
 
     return args
 
 
 def submit_main(args):
+    """the main function of the cli command 'submit'. Not to be used directly."""
     db_check()
 
     args = collect_arguments(args)
@@ -157,21 +161,26 @@ def submit_main(args):
         requirement=args.requirement,
         sparklibs=args.sparklibs,
         out_json=args.out_json,
-        main_script=args.main_script
+        main_script=args.main_script,
+        pytest_args=args.pytest_args,
     )
 
 
 class DbTestFolder:
+    """Context manager that creates a unique test folder on dbfs."""
+
     def __init__(self):
-        test_folder = "/".join(
-            [
-                "test",
-                datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d-%H%M%S"),
-                uuid.uuid4().hex,
-            ]
-        )
+
         self._test_path_base = DbfsLocation(
-            remote=f"dbfs:/{test_folder}", local=f"/dbfs/{test_folder}"
+            "/".join(
+                [
+                    "test",
+                    datetime.datetime.now(datetime.timezone.utc).strftime(
+                        "%Y%m%d-%H%M%S"
+                    ),
+                    uuid.uuid4().hex,
+                ]
+            )
         )
 
     def __enter__(self):
@@ -183,10 +192,23 @@ class DbTestFolder:
         pass
 
 
-def discover_job_tasks(test_path: str, folder: str):
+def discover_job_tasks(test_path: str, folder: str = None):
+    """If folder is given, create parallel tasks from this level.
+    Otherwise, simply return the top folder as the single task.
+    Returns a list of strings with the subfolders to process.
+    """
+
+    test_archive_base = Path(test_path).resolve().absolute()
+    nparts = len(test_archive_base.parts)
+
+    def relpath(p: Path):
+        return p.relative_to(test_archive_base.parent).as_posix()
+
+    if folder is None:
+        return [relpath(test_archive_base)]
 
     subfolders = [
-        x.as_posix() for x in (Path(test_path) / folder).iterdir() if x.is_dir()
+        relpath(x) for x in (Path(test_path) / folder).iterdir() if x.is_dir()
     ]
     return subfolders
 
@@ -194,14 +216,15 @@ def discover_job_tasks(test_path: str, folder: str):
 def discover_and_push_wheels(globpath: str, test_folder: DbfsLocation) -> List[str]:
     result = []
     for item in Path().glob(globpath):
-        remote_path =f'{test_folder.remote}/{item.parts[-1]}'
-        print(f'pushing {item} to to test folder')
+        remote_path = f"{test_folder.remote}/{item.parts[-1]}"
+        print(f"pushing {item} to test folder")
         dbfscall(f"cp {item} {remote_path}")
         result.append(remote_path)
 
     return result
 
-def archive_and_push(test_path:str, test_folder: DbfsLocation):
+
+def archive_and_push(test_path: str, test_folder: DbfsLocation):
     with tempfile.TemporaryDirectory() as tmp:
         test_path = Path(test_path)
         print(f"now archiving {test_path}")
@@ -217,19 +240,24 @@ def archive_and_push(test_path:str, test_folder: DbfsLocation):
 
     return f"{test_folder.local}/tests.zip"
 
-def push_main_file(test_folder: DbfsLocation, main_script:IO[str]=None)-> DbfsLocation:
-    print('now pushing test main file')
-    main_file = test_folder / 'main.py'
+
+def push_main_file(
+    test_folder: DbfsLocation, main_script: IO[str] = None
+) -> DbfsLocation:
+    print("now pushing test main file")
+    main_file = test_folder / "main.py"
     with tempfile.TemporaryDirectory() as tmp:
         with open(Path(tmp) / "main.py", "w") as f:
             if main_script:
                 f.write(main_script.read())
             else:
+                print("Using default main script test_main.py")
                 f.write(inspect.getsource(test_main))
 
         dbfscall(f"cp {tmp}/main.py {main_file.remote}")
 
     return main_file
+
 
 def submit(
     test_path: str,
@@ -239,12 +267,15 @@ def submit(
     requirement: List[str] = None,
     sparklibs: List[dict] = None,
     out_json: IO[str] = None,
-        main_script: IO[str]=None
+    main_script: IO[str] = None,
+    pytest_args: List[str] = None,
 ):
     if requirement is None:
         requirement = []
     if sparklibs is None:
-        sparklibs=[]
+        sparklibs = []
+    if pytest_args is None:
+        pytest_args = []
 
     # check the structure of the cluster object
     if not isinstance(cluster, dict):
@@ -262,7 +293,7 @@ def submit(
             sparklibs.append({"whl": wheel})
 
         archive_local = archive_and_push(test_path, test_folder)
-        main_file = push_main_file(test_folder,main_script)
+        main_file = push_main_file(test_folder, main_script)
 
         print(f"copied everything to {test_folder.remote}")
 
@@ -271,13 +302,13 @@ def submit(
 
         # subtasks will be ['tests/cluster/job1', 'tests/cluster/job2'] or similar
         for task in discover_job_tasks(test_path, folder):
-            task_sub = task.replace("/","_")
+            task_sub = task.replace("/", "_")
             task_cluster = copy.deepcopy(cluster)
-            task_cluster['cluster_log_conf']={'dbfs':{'destination':f"{test_folder.remote}/{task_sub}"}}
+            task_cluster["cluster_log_conf"] = {
+                "dbfs": {"destination": f"{test_folder.remote}/{task_sub}"}
+            }
 
             workflow["tasks"].append(
-
-
                 dict(
                     task_key=task_sub,
                     libraries=sparklibs,
@@ -292,28 +323,28 @@ def submit(
                             # we can actually run any part of our test suite, but some files need the full repo.
                             # Only run tests from this folder.
                             f"--folder={task}",
+                            # additional arguments to pass to pytest
+                            f"--pytestargs={json.dumps(pytest_args)}",
                         ],
                     ),
-                    new_cluster=task_cluster
+                    new_cluster=task_cluster,
                 )
             )
     with tempfile.TemporaryDirectory() as tmp:
         jobfile = f"{tmp}/job.json"
-        with open(jobfile, 'w') as f:
-            json.dump(workflow,f)
-        # with open(jobfile) as f:
-        #     print(f.read())
+        with open(jobfile, "w") as f:
+            json.dump(workflow, f)
         res = dbjcall(f"runs submit --json-file {jobfile}")
         try:
-            run_id=res["run_id"]
+            run_id = res["run_id"]
         except KeyError:
             print(res)
             raise
 
     # now we have the run_id
     print(f"Started run with ID {run_id}")
-    details = dbjcall(f'runs get --run-id {run_id}')
+    details = dbjcall(f"runs get --run-id {run_id}")
     print(f"Follow job details at {details['run_page_url']}")
 
     if out_json:
-        json.dump({'run_id':run_id},out_json)
+        json.dump({"run_id": run_id}, out_json)

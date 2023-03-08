@@ -4,6 +4,10 @@ import sys
 
 
 def db_check():
+    """check that the databricks cli is correctly configured
+    and has an up-to-date authorization token.
+    Returns Nothing.
+    Ends the program if this check fails."""
     try:
         import databricks_cli
     except ImportError:
@@ -20,9 +24,11 @@ def db_check():
         exit(-1)
     dbcall("jobs configure --version=2.1")
 
+
 def dbjcall(command: str):
+    """Run the command line "databricks "+command and return the unpacked json string."""
     p = subprocess.run(
-        "databricks " + command ,
+        "databricks " + command,
         shell=True,
         stdout=subprocess.PIPE,
         check=True,
@@ -36,6 +42,7 @@ def dbjcall(command: str):
 
 
 def dbfscall(command: str):
+    """Run the command line "dbfs "+command and return the output string."""
     p = subprocess.run(
         "dbfs " + command,
         shell=True,
@@ -47,6 +54,7 @@ def dbfscall(command: str):
 
 
 def dbcall(command: str):
+    """Run the command line "databricks "+command and return the resulting string."""
     p = subprocess.run(
         "databricks " + command,
         shell=True,

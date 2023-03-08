@@ -16,10 +16,15 @@ from typing import IO, List, Optional
 from atc_tools.test_job.RunDetails import RunDetails
 from atc_tools.test_job.dbcli import db_check
 
+
 def setup_fetch_parser(subparsers):
+    """
+    Adds a subparser for the command 'fetch'.
+    :param subparsers: must be the object returned by ArgumentParser().add_subparsers()
+    :return:
+    """
     parser: argparse.ArgumentParser = subparsers.add_parser(
-        "fetch",
-        description="Return test run result."
+        "fetch", description="Return test run result."
     )
     parser.set_defaults(func=fetch_main)
 
@@ -52,23 +57,36 @@ def setup_fetch_parser(subparsers):
         help="Stop and cancel job on first failed task.",
     )
 
+
 def collect_args(args):
+    """Post process the arguments of the ."""
     if args.runid is None:
         args.runid = json.load(args.runid_json)["run_id"]
 
     return args
 
+
 def fetch_main(args):
+    """
+    Main function of the 'fetch' command. Only to be used via the cli.
+    :param args: the parsed arguments from the fetch subparser
+    :return:
+    """
     db_check()
 
-    args = collect_args(args)
+    # Post process the arguments
+    if args.runid is None:
+        args.runid = json.load(args.runid_json)["run_id"]
 
     if fetch(args.runid, args.stdout, args.failfast):
         print("Run failed")
         sys.exit(-1)
 
+
 @dataclass
 class TaskState:
+    """The result state of any workflow or task"""
+
     task_key: str
     life_cycle_state: str
     result_state: str
@@ -76,10 +94,12 @@ class TaskState:
 
     @property
     def ended(self):
+        """Has the workflow or task ended?"""
         return self.end_time != 0
 
     @property
     def result(self):
+        """String representing the state of the workflow or task."""
         if not self.ended:
             return self.life_cycle_state
         else:
@@ -87,10 +107,13 @@ class TaskState:
 
     @property
     def success(self):
+        """Has the workflow or task succeeded?"""
         return self.result_state.upper() == "SUCCESS"
 
     @classmethod
     def fromJson(cls, jobj):
+        """Create the result state of the workflow or task from the json object
+        returned by the databricks api."""
         state = jobj["state"]
         return cls(
             task_key=jobj["task_key"] if "task_key" in jobj else jobj["run_name"],
@@ -102,24 +125,31 @@ class TaskState:
 
 @dataclass
 class MultiTaskState:
+    """Result state of a multiTask workflow"""
+
     overall: Optional[TaskState]
     tasks: List[TaskState]
 
     @classmethod
     def fromJson(cls, jobj):
+        """Create the Result state of a multiTask workflow from the json object returned
+        by the databricks api."""
+
         return cls(
             overall=TaskState.fromJson(jobj),
             tasks=[TaskState.fromJson(task) for task in jobj["tasks"]],
         )
 
-
     def accumulate(self):
+        """return a dictionary of {'STATE STRING':counts} where counts represents the
+        number of sub-tasks that share the same run state."""
         counts = defaultdict(int)
         for task in self.tasks:
             counts[task.result] += 1
         return counts
 
     def print_status(self):
+        """Print the overall result state represented by this object."""
         print(
             "Overall state:",
             self.overall.result,
@@ -129,6 +159,9 @@ class MultiTaskState:
 
 
 def fetch(run_id: int, stdout_file: IO[str] = None, failfast=False):
+    """Fetch main function.
+    See the cli help for parameter descriptions and functionality.
+    Can be used programmatically."""
     run = RunDetails(run_id)
     last_state = None
     stdouts = {}
@@ -147,8 +180,7 @@ def fetch(run_id: int, stdout_file: IO[str] = None, failfast=False):
                 out = run.get_stdout(task.task_key)
                 if stdout_file is None:
                     print(out)
-                stdouts[task.task_key]=out
-
+                stdouts[task.task_key] = out
 
         if state.overall.ended:
             break
@@ -156,8 +188,8 @@ def fetch(run_id: int, stdout_file: IO[str] = None, failfast=False):
         run.refresh()
 
     if stdout_file is not None:
-        for k,v in stdouts.items():
-            stdout_file.write("="*50+f"\nTask Output from {k}\n"+"="*50+"\n")
+        for k, v in stdouts.items():
+            stdout_file.write("=" * 50 + f"\nTask Output from {k}\n" + "=" * 50 + "\n")
             stdout_file.write(v)
 
     if last_state.overall.success:
