@@ -17,7 +17,7 @@ import uuid
 
 from pathlib import Path
 import shutil
-from typing import List
+from typing import List, Union
 
 from typing.io import IO
 
@@ -53,15 +53,14 @@ def setup_submit_parser(subparsers):
         help="Location of the tests folder. Will be sendt to databricks as a whole.",
     )
 
-    parser.add_argument(
-        "--folder",
-        help="relative path of test folder in test archive to use in task discovery.",
+    task = parser.add_mutually_exclusive_group(required=True)
+    task.add_argument(
+        "--task",
+        help="Single Test file or folder to execute.",
     )
-
-    parser.add_argument(
-        "--out-json",
-        type=argparse.FileType("w"),
-        help="File to store the RunID for future queries.",
+    task.add_argument(
+        "--tasks-from",
+        help="path in test archive where each subfolder becomes a task.",
     )
 
     # cluster argument pair
@@ -113,6 +112,12 @@ def setup_submit_parser(subparsers):
         "--pytest-args", help="Additional arguments to pass to pytest in each test job."
     )
 
+    parser.add_argument(
+        "--out-json",
+        type=argparse.FileType("w"),
+        help="File to store the RunID for future queries.",
+    )
+
     return
 
 
@@ -143,6 +148,11 @@ def collect_arguments(args):
         ]
 
     args.pytest_args = (args.pytest_args or "").split()
+    if args.tasks_from:
+        args.parallelize = True
+        args.task = args.tasks_from
+    else:
+        args.parallelize = False
 
     return args
 
@@ -155,7 +165,8 @@ def submit_main(args):
 
     submit(
         test_path=args.tests,
-        folder=args.folder,
+        task=args.task,
+        parallelize=args.parallelize,
         cluster=args.cluster,
         wheels=args.wheels,
         requirement=args.requirement,
@@ -192,78 +203,49 @@ class DbTestFolder:
         pass
 
 
-def discover_job_tasks(test_path: str, folder: str = None):
+def verify_and_resolve_task(test_path: str, task: Union[str, Path]):
+    test_archive = Path(test_path).resolve().absolute()
+
+    task_path = Path(task)
+    if not task_path.is_absolute():
+        task_path = (test_archive.parent / task_path).resolve().absolute()
+
+    task_path = task_path.resolve().absolute()
+
+    if not (test_archive == task_path or test_archive in task_path.parents):
+        raise AssertionError(f"task {task} is not contained in {test_path}")
+
+    if not task_path.exists():
+        raise AssertionError(f"task {task_path} does not exist")
+
+    if not (test_archive.parent / task).exists():
+        raise AssertionError(f"The task {task} was not found in the test location.")
+
+    return task_path.relative_to(test_archive.parent).as_posix()
+
+
+def discover_job_tasks(test_path: str, folder: str):
     """If folder is given, create parallel tasks from this level.
     Otherwise, simply return the top folder as the single task.
     Returns a list of strings with the subfolders to process.
     """
 
-    test_archive_base = Path(test_path).resolve().absolute()
-    nparts = len(test_archive_base.parts)
-
-    def relpath(p: Path):
-        return p.relative_to(test_archive_base.parent).as_posix()
-
-    if folder is None:
-        return [relpath(test_archive_base)]
+    test_archive_parent = Path(test_path).resolve().absolute().parent
 
     subfolders = [
-        relpath(x) for x in (Path(test_path) / folder).iterdir() if x.is_dir()
+        verify_and_resolve_task(test_path, x)
+        for x in (test_archive_parent / folder).iterdir()
+        if x.is_dir()
     ]
     return subfolders
 
 
-def discover_and_push_wheels(globpath: str, test_folder: DbfsLocation) -> List[str]:
-    result = []
-    for item in Path().glob(globpath):
-        remote_path = f"{test_folder.remote}/{item.parts[-1]}"
-        print(f"pushing {item} to test folder")
-        dbfscall(f"cp {item} {remote_path}")
-        result.append(remote_path)
-
-    return result
-
-
-def archive_and_push(test_path: str, test_folder: DbfsLocation):
-    with tempfile.TemporaryDirectory() as tmp:
-        test_path = Path(test_path)
-        print(f"now archiving {test_path}")
-        archive_path = shutil.make_archive(
-            str(Path(tmp) / "tests"),
-            "zip",
-            test_path / "..",
-            base_dir=test_path.parts[-1],
-        )
-        print("now pushing test archive to test folder")
-
-        dbfscall(f"cp {archive_path} {test_folder.remote}/tests.zip")
-
-    return f"{test_folder.local}/tests.zip"
-
-
-def push_main_file(
-    test_folder: DbfsLocation, main_script: IO[str] = None
-) -> DbfsLocation:
-    print("now pushing test main file")
-    main_file = test_folder / "main.py"
-    with tempfile.TemporaryDirectory() as tmp:
-        with open(Path(tmp) / "main.py", "w") as f:
-            if main_script:
-                f.write(main_script.read())
-            else:
-                print("Using default main script test_main.py")
-                f.write(inspect.getsource(test_main))
-
-        dbfscall(f"cp {tmp}/main.py {main_file.remote}")
-
-    return main_file
-
-
 def submit(
     test_path: str,
-    folder: str,
+    task: str,
     cluster: dict,
     wheels: str,
+    parallelize: bool,
     requirement: List[str] = None,
     sparklibs: List[dict] = None,
     out_json: IO[str] = None,
@@ -300,8 +282,13 @@ def submit(
         # construct the workflow object
         workflow = dict(run_name="Testing Run", format="MULTI_TASK", tasks=[])
 
-        # subtasks will be ['tests/cluster/job1', 'tests/cluster/job2'] or similar
-        for task in discover_job_tasks(test_path, folder):
+        if parallelize:
+            # subtasks will be ['tests/cluster/job1', 'tests/cluster/job2'] or similar
+            tasks = discover_job_tasks(test_path, task)
+        else:
+            tasks = [verify_and_resolve_task(test_path, task)]
+
+        for task in tasks:
             task_sub = task.replace("/", "_")
             task_cluster = copy.deepcopy(cluster)
             task_cluster["cluster_log_conf"] = {
@@ -348,3 +335,49 @@ def submit(
 
     if out_json:
         json.dump({"run_id": run_id}, out_json)
+
+
+def discover_and_push_wheels(globpath: str, test_folder: DbfsLocation) -> List[str]:
+    result = []
+    for item in Path().glob(globpath):
+        remote_path = f"{test_folder.remote}/{item.parts[-1]}"
+        print(f"pushing {item} to test folder")
+        dbfscall(f"cp {item} {remote_path}")
+        result.append(remote_path)
+
+    return result
+
+
+def archive_and_push(test_path: str, test_folder: DbfsLocation):
+    with tempfile.TemporaryDirectory() as tmp:
+        test_path = Path(test_path)
+        print(f"now archiving {test_path}")
+        archive_path = shutil.make_archive(
+            str(Path(tmp) / "tests"),
+            "zip",
+            test_path / "..",
+            base_dir=test_path.parts[-1],
+        )
+        print("now pushing test archive to test folder")
+
+        dbfscall(f"cp {archive_path} {test_folder.remote}/tests.zip")
+
+    return f"{test_folder.local}/tests.zip"
+
+
+def push_main_file(
+    test_folder: DbfsLocation, main_script: IO[str] = None
+) -> DbfsLocation:
+    print("now pushing test main file")
+    main_file = test_folder / "main.py"
+    with tempfile.TemporaryDirectory() as tmp:
+        with open(Path(tmp) / "main.py", "w") as f:
+            if main_script:
+                f.write(main_script.read())
+            else:
+                print("Using default main script test_main.py")
+                f.write(inspect.getsource(test_main))
+
+        dbfscall(f"cp {tmp}/main.py {main_file.remote}")
+
+    return main_file

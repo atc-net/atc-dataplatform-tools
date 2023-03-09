@@ -23,6 +23,7 @@ marker = "".join(list("\u200E\u200F\u2060")[i % 3] for i in sha1(b"my marker").d
 
 
 def test_main():
+    """Main function to be called inside the test job task. Do not use directly."""
     parser = argparse.ArgumentParser(description="Run Test Cases.")
 
     # location to use for current run. Usually the cluster logs base folder
