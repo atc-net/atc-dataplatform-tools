@@ -98,11 +98,43 @@ The command can submit a single job run, but additionally:
 
 ## How to submit
 
+Usage:
+```powershell
+usage: atc-test-job submit [-h] [--wheels WHEELS] --tests TESTS (--task TASK | --tasks-from TASKS_FROM) (--cluster CLUSTER | --cluster-file CLUSTER_FILE)
+                           [--sparklibs SPARKLIBS | --sparklibs-file SPARKLIBS_FILE] [--requirement REQUIREMENT | --requirements-file REQUIREMENTS_FILE] [--main-script MAIN_SCRIPT]    
+                           [--pytest-args PYTEST_ARGS] [--out-json OUT_JSON]
+
+Run Test Cases on databricks cluster.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --wheels WHEELS       The glob paths of all wheels under test.
+  --tests TESTS         Location of the tests folder. Will be sendt to databricks as a whole.
+  --task TASK           Single Test file or folder to execute.
+  --tasks-from TASKS_FROM
+                        path in test archive where each subfolder becomes a task.
+  --cluster CLUSTER     JSON document describing the cluster setup.
+  --cluster-file CLUSTER_FILE
+                        File with JSON document describing the cluster setup.
+  --sparklibs SPARKLIBS
+                        JSON document describing the spark dependencies.
+  --sparklibs-file SPARKLIBS_FILE
+                        File with JSON document describing the spark dependencies.
+  --requirement REQUIREMENT
+                        a python dependency, specified like for pip
+  --requirements-file REQUIREMENTS_FILE
+                        File with python dependencies, specified like for pip
+  --main-script MAIN_SCRIPT
+                        Your own test_main.py script file, to add custom functionality.
+  --pytest-args PYTEST_ARGS
+                        Additional arguments to pass to pytest in each test job.
+  --out-json OUT_JSON   File to store the RunID for future queries.
+```
 
 ```powershell
-atc_test_job submit `
+atc-test-job submit `
     --tests tests `
-    --folder cluster/job4 `
+    --tasks-from tests/cluster/job4 `
     --cluster-file cluster.json `
     --requirements-file requirements.txt `
     --sparklibs-file sparklibs.json `
@@ -154,6 +186,20 @@ atc_test_job submit `
   provided on the command line when fetching.
 
 ## How to fetch
+Usage:
+```powershell
+usage: atc-test-job fetch [-h] (--runid RUNID | --runid-json RUNID_JSON) [--stdout STDOUT] [--failfast]
+
+Return test run result.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --runid RUNID         Run ID of the test job
+  --runid-json RUNID_JSON
+                        File with JSON document describing the Run ID of the test job.
+  --stdout STDOUT       Output test stdout to this file.
+  --failfast            Stop and cancel job on first failed task.
+```
 
 The `fetch` operation consists of the following steps:
 - periodically query the job progress and print updates to the console.
@@ -165,7 +211,7 @@ The `fetch` operation consists of the following steps:
 
 Example fetch:
 ```powershell
-atc_test_job fetch --runid-json .\test.json --stdout .\stdout.txt
+atc-test-job fetch --runid-json .\test.json --stdout .\stdout.txt
 ```
 
 - The run ID can be supplied through a file or directly in the command line.
