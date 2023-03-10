@@ -13,8 +13,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import IO, List, Optional
 
-from atc_tools.test_job.RunDetails import RunDetails
 from atc_tools.test_job.dbcli import db_check
+from atc_tools.test_job.RunDetails import RunDetails
 
 
 def setup_fetch_parser(subparsers):

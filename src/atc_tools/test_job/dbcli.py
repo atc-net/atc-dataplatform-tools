@@ -9,7 +9,7 @@ def db_check():
     Returns Nothing.
     Ends the program if this check fails."""
     try:
-        import databricks_cli
+        import databricks_cli  # noqa
     except ImportError:
         print("Databricks CLI is not installed", file=sys.stderr)
         exit(-1)
@@ -36,7 +36,7 @@ def dbjcall(command: str):
     )
     try:
         return json.loads(p.stdout)
-    except:
+    except:  # noqa OK because we re-raise
         print(p.stdout)
         raise
 

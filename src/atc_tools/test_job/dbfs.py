@@ -28,7 +28,7 @@ class DbfsLocation:
         if val[:6] not in ["dbfs:/", "/dbfs/"]:
             raise ValueError("Invalid dbfs path")
 
-        result = cls(base=val[:6])
+        return cls(base=val[:6])
 
     @remote.setter
     def set_remote(self, remote: str) -> None:
