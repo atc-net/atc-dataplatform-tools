@@ -12,17 +12,15 @@ import copy
 import datetime
 import inspect
 import json
+import shutil
 import tempfile
 import uuid
-
 from pathlib import Path
-import shutil
 from typing import List, Union
-
 from typing.io import IO
 
 from . import test_main
-from .dbcli import dbjcall, dbfscall, dbcall, db_check
+from .dbcli import db_check, dbfscall, dbjcall
 from .dbfs import DbfsLocation
 
 
@@ -142,9 +140,9 @@ def collect_arguments(args):
     # pre-process 'requirement'
     if args.requirements_file:
         args.requirement = [
-            l.strip()
-            for l in args.requirements_file.read().splitlines()
-            if l.strip() and not l.strip().startswith("#")
+            line.strip()
+            for line in args.requirements_file.read().splitlines()
+            if line.strip() and not line.strip().startswith("#")
         ]
 
     args.pytest_args = (args.pytest_args or "").split()
@@ -181,7 +179,6 @@ class DbTestFolder:
     """Context manager that creates a unique test folder on dbfs."""
 
     def __init__(self):
-
         self._test_path_base = DbfsLocation(
             "/".join(
                 [

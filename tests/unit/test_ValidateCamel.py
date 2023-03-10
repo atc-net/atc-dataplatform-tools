@@ -8,7 +8,6 @@ from src.atc_tools.format.validate_camelcased_cols import validate_camelcased_co
 
 class CamelCaseTest(unittest.TestCase):
     def test_01_pass(self):
-
         data1 = [
             (None,),
         ]
@@ -24,7 +23,6 @@ class CamelCaseTest(unittest.TestCase):
         self.assertTrue(validate_camelcased_cols(df))
 
     def test_02_pass(self):
-
         data2 = [
             (
                 None,
@@ -44,7 +42,6 @@ class CamelCaseTest(unittest.TestCase):
         self.assertTrue(validate_camelcased_cols(df))
 
     def test_03_subset_pass(self):
-
         data3 = [
             (
                 None,
@@ -64,7 +61,6 @@ class CamelCaseTest(unittest.TestCase):
         self.assertTrue(validate_camelcased_cols(df, ["camelCased"]))
 
     def test_04_no_pass(self):
-
         data4 = [
             (
                 None,
@@ -88,7 +84,6 @@ class CamelCaseTest(unittest.TestCase):
         )
 
     def test_05_no_pass(self):
-
         data5 = [
             (
                 None,
@@ -112,7 +107,6 @@ class CamelCaseTest(unittest.TestCase):
         )
 
     def test_07_no_pass(self):
-
         data7 = [
             (
                 None,

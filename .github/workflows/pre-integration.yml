@@ -25,8 +25,18 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python_version }}
+      
       - name: Install test requirements
         run: pip install -r test_requirements.txt
+
+      - name: Check code formatting
+        run: |
+          black --check .
+          isort --check .
+          
+      - name: Check code linting
+        run: flake8 .
+
       - name: Install the package
         run: python setup.py develop
       - name: Run Tests

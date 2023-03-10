@@ -27,7 +27,6 @@ class ExtractEncodedBody:
         return Spark.get().read.json(json_data).schema
 
     def extract_schema_as_json(self, df: DataFrame, pretty_json: bool = False) -> str:
-
         schema = self.extract_schema(df)
 
         # load the json as a data frame. Schema is inferred from data.
@@ -36,7 +35,6 @@ class ExtractEncodedBody:
         return json.dumps(json_schema_raw, indent=4 if pretty_json else None)
 
     def _extract_using_rdd(self, df: DataFrame):
-
         # extract json data rows using name of json_field
         json_data = df.withColumn(
             self.json_field, f.col(self.json_field).cast(t.StringType())
@@ -54,7 +52,6 @@ class ExtractEncodedBody:
     def transform_df(
         self, df: DataFrame, keep_original_body: bool = False
     ) -> DataFrame:
-
         if self._fields_same_name and keep_original_body:
             raise ValueError(
                 f"The field {self.json_field} is overwritten by the extracted json. Give extracted field new name to "
