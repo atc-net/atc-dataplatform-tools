@@ -179,7 +179,6 @@ class DbTestFolder:
     """Context manager that creates a unique test folder on dbfs."""
 
     def __init__(self):
-
         self._test_path_base = DbfsLocation(
             "/".join(
                 [

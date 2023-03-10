@@ -37,7 +37,6 @@ class RunDetails:
         print(log_destination, cluster_instance)
         log_stout_path = f"{log_destination}/{cluster_instance}/driver/stdout"
         with tempfile.TemporaryDirectory() as tmp:
-
             try:
                 self.wait_until_exists(log_stout_path)
             except DbfsFileDoesNotExist:

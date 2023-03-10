@@ -24,7 +24,6 @@ class DbfsLocation:
 
     @classmethod
     def from_str(cls, val: str) -> "DbfsLocation":
-
         if val[:6] not in ["dbfs:/", "/dbfs/"]:
             raise ValueError("Invalid dbfs path")
 
