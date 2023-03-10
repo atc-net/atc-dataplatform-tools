@@ -1,3 +1,4 @@
+import re
 import subprocess
 import tempfile
 import time
@@ -44,14 +45,7 @@ class RunDetails:
 
             dbfscall(f"cp {log_stout_path} {tmp}/stdout")
             with open(f"{tmp}/stdout", encoding="utf-8") as f:
-                lines = iter(f)
-                # read lines until the marker appears
-                for line in lines:
-                    if line.strip() == test_main.marker:
-                        # at the marker, break this loop.
-                        break
-                # The iterator now continues from the first line past the marker.
-                return "\n".join(lines)
+                return clean_cluster_output(f.read())
 
     def wait_until_exists(self, location: str, tries=20, sleep_s=1):
         """Wait until the file exists on dbfs."""
@@ -65,3 +59,32 @@ class RunDetails:
                 time.sleep(sleep_s)
 
         raise DbfsFileDoesNotExist()
+
+
+def clean_cluster_output(raw_stdout: str) -> str:
+    """
+    Clean in two steps:
+    - Step 1 is to find the sequence of invisible marker characters
+      and discard everything before that.
+    - Step 2 is to use regexp to get rid of interspersed java warnings.
+    """
+    # Step 1 split on marker
+    try:
+        _, raw_stdout = raw_stdout.split(test_main.marker)
+    except ValueError:
+        # no marker in input?! try moving on regardless
+        pass
+
+    # step 2 remove GC warnings
+    snip = r"\[\w+: \d+K->\d+K\(\d+K\)\] "
+    pat = re.compile(
+        (
+            r"\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d\d\d\+0000: "
+            r"\[[\w\s]+ \([\w\s]+\) "
+            rf"({snip})+"
+            rf"\d+K->\d+K\(\d+K\), ({snip} , )* \d+.\d+ secs\] "
+            r"\[Times: user=\d+\.\d+ sys=\d+\.\d+, real=\d+\.\d+ secs\] "
+            r"\n?"
+        ).replace(" ", r"\s*")
+    )
+    return pat.sub("", raw_stdout)
