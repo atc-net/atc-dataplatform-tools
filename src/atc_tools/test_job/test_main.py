@@ -15,7 +15,6 @@ import sys
 from hashlib import sha1
 
 import pytest
-from atc.spark import Spark
 
 # print a marker message to screen to mark the start of python output
 # make it invisible using only "\u200E\u200F\u2060" https://invisible-characters.com/
@@ -50,6 +49,10 @@ def test_main():
     shutil.unpack_archive(args.archive)
 
     # Ensure Spark is initialized before any tests are run
+    # the import statement is inside the function so that the outer file
+    # can be imported even where pyspark may not be available
+    from atc.spark import Spark
+
     Spark.get()
 
     print()
