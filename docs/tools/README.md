@@ -156,7 +156,7 @@ The above returns a dictionary, where the keys point to the location of the clas
 The `get_classes_of_type()` method is configurable such that only classes of the `obj` type is returned and not its subclasses:
 ```python
 from atc_tools.helpers import ModuleHelper
-from the_project.denmark.foo import A
+from dataplatform.foo.main import A
 
 only_main_classes_of_type_A = ModuleHelper.get_classes_of_type(
     package="dataplatform",
@@ -176,7 +176,7 @@ Or it can be configured to only return subclasses:
 
 ```python
 from atc_tools.helpers import ModuleHelper
-from the_project.denmark.foo import A
+from dataplatform.foo.main import A
 
 only_main_classes_of_type_A = ModuleHelper.get_classes_of_type(
     package="dataplatform",
@@ -192,3 +192,87 @@ The above returns:
     "dataplatform.bar.sub.C": {"module_name": str, "module": ModuleType, "cls_name": str, "cls", type},
 }
 ```
+
+## TaskEntryPointHelper
+
+The `TaskEntryPointHelper` provides the method `get_all_task_entry_points()`, which uses the ModuleHelper (see the documentation above) to retrieve all `task()` methods of the subclasses of the class `TaskEntryPoint`. Note that `TaskEntryPoint` is an abstract base class from atc-dataplatform, see the documentation over there.
+
+### Example - `get_all_task_entry_points()` method
+
+Consider the following project:
+
+```
+.
+└── src/
+    ├── dataplatform/
+    │   ├── foo/
+    │   │   ├── __init__.py
+    │   │   └── main.py
+    │   └── bar/
+    │       ├── __init__.py
+    │       └── sub.py
+    └── __init__.py
+```
+
+The module `dataplatform.foo.main` has:
+
+```python
+from atc.entry_points import TaskEntryPoint
+
+class First(TaskEntryPoint):
+    @classmethod
+    def task(cls) -> None:
+        ...  # implementation of the task here
+```
+
+And the module `dataplatform.bar.sub` has:
+
+```python
+from atc.entry_points import TaskEntryPoint
+
+class Second(TaskEntryPoint):
+    @classmethod
+    def task(cls) -> None:
+        ...  # implementation of the task here
+```
+
+Now, by utilizing the `get_all_task_entry_points()` method all the `task()` class methods can automatically be discovered as entry points:
+
+```python
+from atc_tools.entry_points import TaskEntryPointHelper
+
+TaskEntryPointHelper.get_all_task_entry_points(
+    packages=["dataplatform.foo", "dataplatform.bar"],
+)
+```
+
+This returns a dictionary:
+```python
+{
+    "atc_tools.task_entry_points": [
+        "dataplatform.foo.main.First = dataplatform.foo.main:First.task",
+        "dataplatform.bar.sub.Second = dataplatform.bar.sub:Second.task",
+    ],
+}
+```
+
+The developer can add this key-value pair to their setup of their package. When new subclasses of the `TaskEntryPoint` class are added then this function automatically discover the entry points for their `task()` methods.
+
+If the developer wants to see the entry points, a path to a txt file can be added when executing the method:
+
+```python
+from atc_tools.entry_points import TaskEntryPointHelper
+
+TaskEntryPointHelper.get_all_task_entry_points(
+    packages=["dataplatform.foo", "dataplatform.bar"],
+    output_txt_file="discovered_task_entry_points.txt",
+)
+```
+
+This produces a text file named `discovered_task_entry_points.txt` and contains:
+```
+dataplatform.foo.main.First = dataplatform.foo.main:First.task
+dataplatform.bar.sub.Second = dataplatform.bar.sub:Second.task
+```
+
+This way it is easy to verify and check entry points manually if the developers workflow depends on this.
