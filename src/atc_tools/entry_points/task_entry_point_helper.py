@@ -10,6 +10,7 @@ class TaskEntryPointHelper:
     def get_all_task_entry_points(
         packages: List[str],
         output_txt_file: str = None,
+        entry_point_object: type = None,
     ) -> dict:
         """
         Returns a dictionary of entry points for all `TaskEntryPoint` objects found
@@ -20,6 +21,9 @@ class TaskEntryPointHelper:
                 A list of package names to search for `TaskEntryPoint` objects.
             output_txt_file (str, optional) default = None:
                 The name of a text file to write the entry points to.
+            entry_point_object (type, optional) default = None:
+                A object to get entry points from. Use for a custom base class that has
+                a `task()` method.
 
         Returns:
             dict:
@@ -31,13 +35,15 @@ class TaskEntryPointHelper:
         if not isinstance(packages, List):
             raise TypeError("The 'packages' argument need to be of type 'List'")
 
+        entry_point_object = entry_point_object or TaskEntryPoint
+
         entry_point_objs = {}
 
         for package in packages:
             entry_point_objs.update(
                 ModuleHelper.get_classes_of_type(
                     package=package,
-                    obj=TaskEntryPoint,
+                    obj=entry_point_object,
                     main_classes=False,
                     sub_classes=True,
                 )
