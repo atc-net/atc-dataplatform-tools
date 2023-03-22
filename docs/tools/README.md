@@ -279,7 +279,7 @@ This way it is easy to verify and check entry points manually if the developers 
 
 ### Example - Using the `get_all_task_entry_points()` method with a different base class
 
-The `get_all_task_entry_points()` method is tied closely with the atc-dataplatform `TaskEntryPoint` class. If there is a use case for implementing a custom base class (with a `task()` abstract class method) then a `entry_point_object` variable can be set to look for a different base class. See below example:
+The `get_all_task_entry_points()` method is tied closely with the atc-dataplatform `TaskEntryPoint` class. If there is a use case for implementing other custom base classes (with a `task()` abstract class method) then a `entry_point_objects` list variable can be set to look for a different base classes. See below example:
 
 ```python
 from abc import ABC, abstractmethod
@@ -304,11 +304,24 @@ class B(OtherBaseClass):
         pass
 
 
+class AnotherBaseClass(ABC):
+    @classmethod
+    @abstractmethod
+    def task(cls) -> None:
+        pass
+
+
+class C(AnotherBaseClass):
+    @classmethod
+    def task(cls) -> None:
+        pass
+
+
 TaskEntryPointHelper.get_all_task_entry_points(
     packages=["dataplatform.foo", "dataplatform.bar"],
-    entry_point_object=OtherBaseClass,
+    entry_point_objects=[OtherBaseClass],
 )
 ```
 
-This returns a dictionary in the same manner as earlier, but pointing to `A` and `B` as they are children of the new `OtherBaseClass` class.
+This returns a dictionary of entry points pointing to `A`, `B`, and `C` as they are children of the new `OtherBaseClass` and `AnotherBaseClass` classes.
 ```

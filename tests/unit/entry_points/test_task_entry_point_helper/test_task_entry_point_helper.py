@@ -10,21 +10,25 @@ class TestModuleHelper(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         sys.path.insert(0, "tests")
-        cls.test_path = "unit.entry_points.test_task_entry_point_helper.dummy_module"
+        cls.test_path_1 = "unit.entry_points.test_task_entry_point_helper.dummy_module"
         cls.test_file_path = (
             "tests/unit/entry_points/test_task_entry_point_helper/test_file.txt"
         )
 
+        cls.test_path_2 = (
+            "unit.entry_points.test_task_entry_point_helper.other_dummy_module"
+        )
+
     def test_get_all_task_entry_points(self):
         entry_points = TaskEntryPointHelper.get_all_task_entry_points(
-            [self.test_path],
+            [self.test_path_1],
         )
 
         expected_output = {
             "atc_tools.task_entry_points": [
-                f"{self.test_path}.foo.A = " + f"{self.test_path}.foo:A.task",
-                f"{self.test_path}.submodule.bar.B = "
-                + f"{self.test_path}.submodule.bar:B.task",
+                f"{self.test_path_1}.foo.A = " + f"{self.test_path_1}.foo:A.task",
+                f"{self.test_path_1}.submodule.bar.B = "
+                + f"{self.test_path_1}.submodule.bar:B.task",
             ]
         }
 
@@ -38,7 +42,7 @@ class TestModuleHelper(unittest.TestCase):
 
     def test_write_to_file(self):
         TaskEntryPointHelper.get_all_task_entry_points(
-            [self.test_path],
+            [self.test_path_1],
             self.test_file_path,
         )
 
@@ -46,9 +50,9 @@ class TestModuleHelper(unittest.TestCase):
             contents = file.read()
 
         expected_content = (
-            f"{self.test_path}.foo.A = " + f"{self.test_path}.foo:A.task\n"
-            f"{self.test_path}.submodule.bar.B = "
-            + f"{self.test_path}.submodule.bar:B.task\n"
+            f"{self.test_path_1}.foo.A = " + f"{self.test_path_1}.foo:A.task\n"
+            f"{self.test_path_1}.submodule.bar.B = "
+            + f"{self.test_path_1}.submodule.bar:B.task\n"
         )
 
         self.assertEqual(contents, expected_content)
@@ -60,17 +64,43 @@ class TestModuleHelper(unittest.TestCase):
             def task(cls) -> None:
                 pass
 
-        test_path = "unit.entry_points.test_task_entry_point_helper.other_dummy_module"
-
         entry_points = TaskEntryPointHelper.get_all_task_entry_points(
-            packages=[test_path],
-            entry_point_object=OtherBaseClass,
+            packages=[self.test_path_2],
+            entry_point_objects=[OtherBaseClass],
         )
 
         expected_output = {
             "atc_tools.task_entry_points": [
-                f"{test_path}.foo.A = {test_path}.foo:A.task",
-                f"{test_path}.foo.B = {test_path}.foo:B.task",
+                f"{self.test_path_2}.foo.A = {self.test_path_2}.foo:A.task",
+                f"{self.test_path_2}.foo.B = {self.test_path_2}.foo:B.task",
+            ]
+        }
+
+        self.assertEqual(entry_points, expected_output)
+
+    def test_use_multiple_entry_point_objects(self):
+        class OtherBaseClass(ABC):
+            @classmethod
+            @abstractmethod
+            def task(cls) -> None:
+                pass
+
+        class AnotherBaseClass(ABC):
+            @classmethod
+            @abstractmethod
+            def task(cls) -> None:
+                pass
+
+        entry_points = TaskEntryPointHelper.get_all_task_entry_points(
+            packages=[self.test_path_2],
+            entry_point_objects=[OtherBaseClass, AnotherBaseClass],
+        )
+
+        expected_output = {
+            "atc_tools.task_entry_points": [
+                f"{self.test_path_2}.foo.A = {self.test_path_2}.foo:A.task",
+                f"{self.test_path_2}.foo.B = {self.test_path_2}.foo:B.task",
+                f"{self.test_path_2}.foo.C = {self.test_path_2}.foo:C.task",
             ]
         }
 
