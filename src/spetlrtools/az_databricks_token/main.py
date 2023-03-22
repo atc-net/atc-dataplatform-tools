@@ -1,8 +1,8 @@
 import argparse
 from pathlib import Path
 
-from atc_tools.az_databricks_token.get_ad_access_token import get_ad_access_token
-from atc_tools.az_databricks_token.get_impersonation_authorization_code import (
+from spetlrtools.az_databricks_token.get_ad_access_token import get_ad_access_token
+from spetlrtools.az_databricks_token.get_impersonation_authorization_code import (
     get_impersonation_authorization_code,
 )
 

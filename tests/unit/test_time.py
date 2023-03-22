@@ -1,6 +1,6 @@
 import unittest
 
-from atc_tools.time import TimeSequence
+from spetlrtools.time import TimeSequence
 
 
 class TimeTest(unittest.TestCase):

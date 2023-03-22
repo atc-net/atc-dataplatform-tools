@@ -3,8 +3,8 @@ import subprocess
 import tempfile
 import time
 
-from atc_tools.test_job import test_main
-from atc_tools.test_job.dbcli import dbcall, dbfscall, dbjcall
+from spetlrtools.test_job import test_main
+from spetlrtools.test_job.dbcli import dbcall, dbfscall, dbjcall
 
 
 class DbfsFileDoesNotExist(Exception):

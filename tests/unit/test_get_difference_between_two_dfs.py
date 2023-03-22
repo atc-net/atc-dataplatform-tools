@@ -4,7 +4,7 @@ import warnings
 from atc.spark import Spark
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-from atc_tools.helpers.get_difference_between_two_dfs import (
+from spetlrtools.helpers.get_difference_between_two_dfs import (
     get_difference_between_two_dfs,
 )
 

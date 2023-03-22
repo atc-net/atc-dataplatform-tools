@@ -13,11 +13,11 @@ atc-dataplatform==0.5.2
 
 At the same time it is good to run at the latest patched version of all 
 dependencies. The `requirements.txt` file therefore needs to be updated 
-regularly with all the latest versions. `atc-dataplatform-tools` provides
+regularly with all the latest versions. `spetlr-tools` provides
 a command line tool for doing this:
 
 ```
-$> atc_dp_freeze_req requirements.txt
+$> spetlr-freeze-req requirements.txt
 ```
 
 will output the freeze version for all libraries that are installed directly,
@@ -26,7 +26,7 @@ The recommended use-case is to output this list of libraries to a freeze file
 such as 
 
 ```
-$> atc_dp_freeze_req requirements.txt -o requirements_freeze.txt
+$> spetlr-freeze-req requirements.txt -o requirements_freeze.txt
 ```
 
 and then use the freeze file when installing your product. You can always 
@@ -38,12 +38,12 @@ file with requirements. The frozen version of all (sub-)dependencies can then
 be injected into your configuration file with
 
 ```
-$> atc_dp_freeze_req requirements.txt --cfg
+$> spetlr-freeze-req requirements.txt --cfg
 ```
 
 The help message of the tool is shown here for completeness:
 ```
-usage: atc_dp_freeze_req [-h] [-o, --out-file OUT_FILE] [--cfg] [--cfg-file CFG_FILE] [--reject REJECT] in_file
+usage: spetlr-freeze-req [-h] [-o, --out-file OUT_FILE] [--cfg] [--cfg-file CFG_FILE] [--reject REJECT] in_file
 
 Update requirement versions in specified file.
 
@@ -71,7 +71,7 @@ After setting up the initial web-app for authentication, you can use
 the command line tool provided by this package to get the token quickly.
 
 ```
-$> atc_az_databricks_token --appId $appId --tenantId $tenantId --workspaceUrl $workspaceUrl
+$> spetlr-az-databricks-token --appId $appId --tenantId $tenantId --workspaceUrl $workspaceUrl
 ```
 
 The parameters `appId` and `tenantId` correspond to the web-app that you registered.
@@ -100,7 +100,7 @@ The command can submit a single job run, but additionally:
 
 Usage:
 ```powershell
-usage: atc-test-job submit [-h] [--wheels WHEELS] --tests TESTS (--task TASK | --tasks-from TASKS_FROM) (--cluster CLUSTER | --cluster-file CLUSTER_FILE)
+usage: spetlr-test-job submit [-h] [--wheels WHEELS] --tests TESTS (--task TASK | --tasks-from TASKS_FROM) (--cluster CLUSTER | --cluster-file CLUSTER_FILE)
                            [--sparklibs SPARKLIBS | --sparklibs-file SPARKLIBS_FILE] [--requirement REQUIREMENT | --requirements-file REQUIREMENTS_FILE] [--main-script MAIN_SCRIPT]    
                            [--pytest-args PYTEST_ARGS] [--out-json OUT_JSON]
 
@@ -132,7 +132,7 @@ optional arguments:
 ```
 
 ```powershell
-atc-test-job submit `
+spetlr-test-job submit `
     --tests tests `
     --tasks-from tests/cluster/job4 `
     --cluster-file cluster.json `
@@ -188,7 +188,7 @@ atc-test-job submit `
 ## How to fetch
 Usage:
 ```powershell
-usage: atc-test-job fetch [-h] (--runid RUNID | --runid-json RUNID_JSON) [--stdout STDOUT] [--failfast]
+usage: spetlr-test-job fetch [-h] (--runid RUNID | --runid-json RUNID_JSON) [--stdout STDOUT] [--failfast]
 
 Return test run result.
 
@@ -211,7 +211,7 @@ The `fetch` operation consists of the following steps:
 
 Example fetch:
 ```powershell
-atc-test-job fetch --runid-json .\test.json --stdout .\stdout.txt
+spetlr-test-job fetch --runid-json .\test.json --stdout .\stdout.txt
 ```
 
 - The run ID can be supplied through a file or directly in the command line.

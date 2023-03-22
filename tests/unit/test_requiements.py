@@ -1,11 +1,11 @@
 import unittest
 
-import atc_tools.requirements
+import spetlrtools.requirements
 
 
 class RequirementsTest(unittest.TestCase):
     def test_function(self):
-        freeze = atc_tools.requirements.freeze_req(
+        freeze = spetlrtools.requirements.freeze_req(
             """
             backports.zoneinfo >= 0.1
 

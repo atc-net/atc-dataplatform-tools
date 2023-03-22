@@ -35,7 +35,7 @@ def get_local_version():
 def get_test_pypi_version():
     try:
         test_pypi = json.load(
-            urlopen("https://test.pypi.org/pypi/atc-dataplatform-tools/json")
+            urlopen("https://test.pypi.org/pypi/spetlr-tools/json")
         )
         test_pypi_version = parse(test_pypi["info"]["version"])
         return test_pypi_version

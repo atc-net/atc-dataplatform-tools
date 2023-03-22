@@ -2,7 +2,7 @@ from typing import List
 
 from atc.entry_points import TaskEntryPoint
 
-from atc_tools.helpers import ModuleHelper
+from spetlrtools.helpers import ModuleHelper
 
 
 class TaskEntryPointHelper:
@@ -28,7 +28,7 @@ class TaskEntryPointHelper:
         Returns:
             dict:
                 A dictionary of entry points, with a single key called
-                'atc_tools.task_entry_points'. The value of the key is a list of all
+                'spetlrtools.task_entry_points'. The value of the key is a list of all
                 discovered `TaskEntryPoint` classes with the `task()` method
                 implemented.
         """
@@ -59,19 +59,19 @@ class TaskEntryPointHelper:
                     )
                 )
 
-        entry_points = {"atc_tools.task_entry_points": []}
+        entry_points = {"spetlrtools.task_entry_points": []}
 
         for module_and_cls, contents in entry_point_objs.items():
             entry_point_name = module_and_cls
             module_name = contents["module_name"]
             cls_name = contents["cls_name"]
-            entry_points["atc_tools.task_entry_points"].append(
+            entry_points["spetlrtools.task_entry_points"].append(
                 f"{entry_point_name} = {module_name}:{cls_name}.task"
             )
 
         if output_txt_file:
             with open(output_txt_file, "w") as auto_ep_file:
-                for entry_point in entry_points["atc_tools.task_entry_points"]:
+                for entry_point in entry_points["spetlrtools.task_entry_points"]:
                     print(f"Found entry point: {entry_point}")
                     auto_ep_file.write(f"{entry_point}\n")
 
