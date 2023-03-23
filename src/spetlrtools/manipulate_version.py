@@ -20,7 +20,9 @@ def main():
         action="store_true",
         help="prepare pre-release version for test.pypi",
     )
-    parser.add_argument("--name", help="Package name, if different from setup.cfg")
+    parser.add_argument(
+        "--name", help="Package name, if different from name in setup.cfg"
+    )
     parser.add_argument(
         "--version-file",
         default="src/VERSION.txt",

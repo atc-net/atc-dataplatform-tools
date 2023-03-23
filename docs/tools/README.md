@@ -392,3 +392,43 @@ TaskEntryPointHelper.get_all_task_entry_points(
 
 This returns a dictionary of entry points pointing to `A`, `B`, and `C` as they are 
 children of the new `OtherBaseClass` and `AnotherBaseClass` classes.
+
+
+## Manipulate Versions
+
+In our release pipelines, we pursue a stategy of combined manual and automated 
+version handling. The file `src/VERSION.txt` contains a version of the form `major.
+minor.micro` in conformance with [Python PEP-0440](https://peps.python.org/pep-0440/).
+We provide a tool to automatically increment the micro and release candidate version so 
+that it is higher with respect to PyPI and test.PyPI, so that uploads can happen 
+automatically.
+
+The intention is that all release candidates are uploaded only to test.PyPi, while 
+all final versions are uploaded to PyPI proper.
+
+The tool supports this manipulation in when used as follows:
+```
+usage: spetlr-manipulate-version [-h] [-t] [--name NAME] [--version-file VERSION_FILE]
+
+Automatically set the version for upload to pypi
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t                    prepare pre-release version for test.pypi
+  --name NAME           Package name, if different from name in setup.cfg
+  --version-file VERSION_FILE
+                        location of version to manipulate
+```
+
+In the current repo, it can be used without arguments. The manipulations are best 
+illustrated by this example:
+
+| situation                      | VERSION.txt | pypi.org | test.pypi.org | cli flags | new version |
+|--------------------------------|-------------|----------|---------------|-----------|-------------|
+| post-integration version 0.2.8 | 0.2.8       | 0.1.34   | 0.1.34rc4     | -t        | 0.2.8rc1    |
+| release new version 0.2.8      | 0.2.8       | 0.1.34   | 0.2.8rc1      |           | 0.2.8       |
+| normal post-integration        | 0.2.8       | 0.2.8    | 0.2.8rc1      | -t        | 0.2.9rc1    |
+| second post-integration        | 0.2.8       | 0.2.8    | 0.2.9rc1      | -t        | 0.2.9rc2    |
+| normal release                 | 0.2.8       | 0.2.8    | 0.2.9rc1      |           | 0.2.9       |
+| re-run of release              | 0.2.8       | 0.2.9    | 0.2.9rc1      |           | 0.2.10      |
+
