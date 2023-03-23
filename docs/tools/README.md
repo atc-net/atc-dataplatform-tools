@@ -2,7 +2,8 @@
 
 ## ValidateCamelCasedCols
 
-The function takes a dataframe and validates if all columns or a given subset of columns are camelCased.
+The function takes a dataframe and validates if all columns or a given subset of 
+columns are camelCased.
 The algorithm is simple, where the following must hold:
 * Column name must be camelCased.
 * Column name must NOT contain two or more recurrent characters. 
@@ -32,11 +33,15 @@ OUTPUT: True
 
 *This is just a tool for investigating - not for production purposes.*
 
-Some files - like eventhub capture files - contains a binary encoded *Body* column. The `ExtractEventhubBody` class can help decode the column.
-Either one can get the encoded schema as a json schema (`extract_json_schema`) or transform the dataframe using `transform_df`.
+Some files - like eventhub capture files - contains a binary encoded *Body* column. 
+The `ExtractEventhubBody` class can help decode the column.
+Either one can get the encoded schema as a json schema (`extract_json_schema`) or 
+transform the dataframe using `transform_df`.
 
-Be aware, that the schema extraction can be a slow process, so it is not recommended to use the extractor in a production setting. 
-*HINT: You should in stead find a way to have a static schema definition. Either as a json schema, pyspark struct 
+Be aware, that the schema extraction can be a slow process, so it is not recommended 
+to use the extractor in a production setting. 
+*HINT: You should in stead find a way to have a static schema definition. Either as 
+a json schema, pyspark struct 
 or read the schema from a target table - and use that for decode the Body.*
 
 ``` python
@@ -65,9 +70,20 @@ OUTPUT:
 
 ## ModuleHelper
 
-The `ModuleHelper` class provides developers with a useful tool for interacting with modules in Python. Its primary purpose is to allow developers to retrieve all modules from a given package or module in a flexible manner, without requiring detailed knowledge of the module structure. Additionally, the `ModuleHelper` class enables developers to retrieve classes and/or subclasses of a specified type from a package or module, further simplifying the process of working with multiple modules.
+The `ModuleHelper` class provides developers with a useful tool for interacting with 
+modules in Python. Its primary purpose is to allow developers to retrieve all 
+modules from a given package or module in a flexible manner, without requiring 
+detailed knowledge of the module structure. Additionally, the `ModuleHelper` class 
+enables developers to retrieve classes and/or subclasses of a specified type from a 
+package or module, further simplifying the process of working with multiple modules.
 
-For example, consider a scenario where a developer is working on a large-scale Python project with numerous modules, many of which may not be directly related to the current task at hand. By using the `ModuleHelper` class, the developer can quickly and easily retrieve all relevant modules or classes/subclasses, without needing to know the precise structure or location of each individual module/class/subclass. This can save significant time and effort, as well as making the code more maintainable and easier to understand.
+For example, consider a scenario where a developer is working on a large-scale 
+Python project with numerous modules, many of which may not be directly related to 
+the current task at hand. By using the `ModuleHelper` class, the developer can 
+quickly and easily retrieve all relevant modules or classes/subclasses, without 
+needing to know the precise structure or location of each individual 
+module/class/subclass. This can save significant time and effort, as well as making 
+the code more maintainable and easier to understand.
 
 ### Example - `get_modules()` method
 
@@ -86,7 +102,9 @@ Consider the following project:
     └── __init__.py
 ```
 
-The modules `dataplatform.foo.main` and `dataplatform.bar.sub` can be retrieved using the `get_modules()` method (if either module had any submodules those would be retrieved as well):
+The modules `dataplatform.foo.main` and `dataplatform.bar.sub` can be retrieved 
+using the `get_modules()` method (if either module had any submodules those would be
+retrieved as well):
 
 ```python
 from spetlrtools.helpers import ModuleHelper
@@ -96,7 +114,9 @@ denmark_modules = ModuleHelper.get_modules(
 )
 ```
 
-The above returns a dictionary, where the each key point to the location of a module. The values are the respective module of type `ModuleType` (from the builtin types library):
+The above returns a dictionary, where the each key point to the location of a module
+The values are the respective module of type `ModuleType` (from the builtin types 
+library):
 
 ```python
 {
@@ -129,9 +149,14 @@ class D:
     ... # implementation of class D
 ```
 
-We have that `/main.py` defines a `class A`. And `class B` and `class C` are subclasses (inherited) hereof. Keep in mind, `class C` is inherits from `class A` and that `class A` is imported from the `dataplatform.foo.main` module. `class D` just sits in `dataplatform.bar.sub` but is not a subclass of any of the other classes.
+We have that `/main.py` defines a `class A`. And `class B` and `class C` are 
+subclasses (inherited) hereof. Keep in mind, `class C` is inherits from `class A` 
+and that `class A` is imported from the `dataplatform.foo.main` module. `class D` 
+just sits in `dataplatform.bar.sub` but is not a subclass of any of the other classes.
 
-Using the `get_classes_of_type()` method from the `ModuleHelper` all definitions of `class A` can be retrieved together with its subclasses `class B` and `class C` (and not `class D`):
+Using the `get_classes_of_type()` method from the `ModuleHelper` all definitions of 
+`class A` can be retrieved together with its subclasses `class B` and `class C` (and
+not `class D`):
 
 ```python
 from spetlrtools.helpers import ModuleHelper
@@ -143,17 +168,35 @@ classes_and_subclasses_of_type_A = ModuleHelper.get_classes_of_type(
 )
 ```
 
-The above returns a dictionary, where the keys point to the location of the classes. The values are a respective dictionary containing information about the module that the class is associated with and the class itself:
+The above returns a dictionary, where the keys point to the location of the classes. 
+The values are a respective dictionary containing information about the module that 
+the class is associated with and the class itself:
 
 ```python
 {
-    "dataplatform.foo.main.A": {"module_name": str, "module": ModuleType, "cls_name": str, "cls", type},
-    "dataplatform.foo.main.B": {"module_name": str, "module": ModuleType, "cls_name": str, "cls", type},
-    "dataplatform.bar.sub.C": {"module_name": str, "module": ModuleType, "cls_name": str, "cls", type},
+    "dataplatform.foo.main.A": {
+        "module_name": str, 
+        "module": ModuleType, 
+        "cls_name": str, 
+        "cls": type
+    },
+    "dataplatform.foo.main.B": {
+        "module_name": str, 
+        "module": ModuleType, 
+        "cls_name": str, 
+        "cls": type
+    },
+    "dataplatform.bar.sub.C": {
+        "module_name": str, 
+        "module": ModuleType, 
+        "cls_name": str, 
+        "cls": type
+    },
 }
 ```
 
-The `get_classes_of_type()` method is configurable such that only classes of the `obj` type is returned and not its subclasses:
+The `get_classes_of_type()` method is configurable such that only classes of the 
+`obj` type is returned and not its subclasses:
 ```python
 from spetlrtools.helpers import ModuleHelper
 from dataplatform.foo.main import A
@@ -168,7 +211,12 @@ only_main_classes_of_type_A = ModuleHelper.get_classes_of_type(
 The above returns: 
 ```python
 {
-    "dataplatform.foo.main.A": {"module_name": str, "module": ModuleType, "cls_name": str, "cls", type}
+    "dataplatform.foo.main.A": {
+        "module_name": str, 
+        "module": ModuleType, 
+        "cls_name": str, 
+        "cls": type
+    }
 }
 ```
 
@@ -188,14 +236,25 @@ only_main_classes_of_type_A = ModuleHelper.get_classes_of_type(
 The above returns: 
 ```python
 {
-    "dataplatform.foo.main.B": {"module_name": str, "module": ModuleType, "cls_name": str, "cls", type},
-    "dataplatform.bar.sub.C": {"module_name": str, "module": ModuleType, "cls_name": str, "cls", type},
+    "dataplatform.foo.main.B": {
+        "module_name": str, 
+        "module": ModuleType, 
+        "cls_name": str, 
+        "cls": type
+    },
+    "dataplatform.bar.sub.C": {
+        "module_name": str, 
+        "module": ModuleType, 
+        "cls_name": str, 
+        "cls": type
+    },
 }
 ```
 
 ## TaskEntryPointHelper
 
-The `TaskEntryPointHelper` provides the method `get_all_task_entry_points()`, which uses the ModuleHelper (see the documentation above) to retrieve all `task()` methods of the subclasses of the class `TaskEntryPoint`. Note that `TaskEntryPoint` is an abstract base class from atc-dataplatform, see the documentation over there.
+The `TaskEntryPointHelper` provides the method `get_all_task_entry_points()`, which 
+uses the ModuleHelper (see the documentation above) to retrieve all `task()` methods of the subclasses of the class `TaskEntryPoint`. Note that `TaskEntryPoint` is an abstract base class from atc-dataplatform, see the documentation over there.
 
 ### Example - `get_all_task_entry_points()` method
 
@@ -236,7 +295,8 @@ class Second(TaskEntryPoint):
         ...  # implementation of the task here
 ```
 
-Now, by utilizing the `get_all_task_entry_points()` method all the `task()` class methods can automatically be discovered as entry points:
+Now, by utilizing the `get_all_task_entry_points()` method all the `task()` class 
+methods can automatically be discovered as entry points:
 
 ```python
 from spetlrtools.entry_points import TaskEntryPointHelper
@@ -256,9 +316,12 @@ This returns a dictionary:
 }
 ```
 
-The developer can add this key-value pair to their setup of their package. When new subclasses of the `TaskEntryPoint` class are added then this function automatically discover the entry points for their `task()` methods.
+The developer can add this key-value pair to their setup of their package. When new 
+subclasses of the `TaskEntryPoint` class are added then this function automatically 
+discover the entry points for their `task()` methods.
 
-If the developer wants to see the entry points, a path to a txt file can be added when executing the method:
+If the developer wants to see the entry points, a path to a txt file can be added 
+when executing the method:
 
 ```python
 from spetlrtools.entry_points import TaskEntryPointHelper
@@ -275,11 +338,15 @@ dataplatform.foo.main.First = dataplatform.foo.main:First.task
 dataplatform.bar.sub.Second = dataplatform.bar.sub:Second.task
 ```
 
-This way it is easy to verify and check entry points manually if the developers workflow depends on this.
+This way it is easy to verify and check entry points manually if the developers 
+workflow depends on this.
 
 ### Example - Using the `get_all_task_entry_points()` method with a different base class
 
-The `get_all_task_entry_points()` method is tied closely with the atc-dataplatform `TaskEntryPoint` class. If there is a use case for implementing other custom base classes (with a `task()` abstract class method) then a `entry_point_objects` list variable can be set to look for a different base classes. See below example:
+The `get_all_task_entry_points()` method is tied closely with the atc-dataplatform 
+`TaskEntryPoint` class. If there is a use case for implementing other custom base 
+classes (with a `task()` abstract class method) then a `entry_point_objects` list 
+variable can be set to look for a different base classes. See below example:
 
 ```python
 from abc import ABC, abstractmethod
@@ -323,5 +390,45 @@ TaskEntryPointHelper.get_all_task_entry_points(
 )
 ```
 
-This returns a dictionary of entry points pointing to `A`, `B`, and `C` as they are children of the new `OtherBaseClass` and `AnotherBaseClass` classes.
+This returns a dictionary of entry points pointing to `A`, `B`, and `C` as they are 
+children of the new `OtherBaseClass` and `AnotherBaseClass` classes.
+
+
+## Manipulate Versions
+
+In our release pipelines, we pursue a stategy of combined manual and automated 
+version handling. The file `src/VERSION.txt` contains a version of the form `major.
+minor.micro` in conformance with [Python PEP-0440](https://peps.python.org/pep-0440/).
+We provide a tool to automatically increment the micro and release candidate version so 
+that it is higher with respect to PyPI and test.PyPI, so that uploads can happen 
+automatically.
+
+The intention is that all release candidates are uploaded only to test.PyPi, while 
+all final versions are uploaded to PyPI proper.
+
+The tool supports this manipulation in when used as follows:
 ```
+usage: spetlr-manipulate-version [-h] [-t] [--name NAME] [--version-file VERSION_FILE]
+
+Automatically set the version for upload to pypi
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t                    prepare pre-release version for test.pypi
+  --name NAME           Package name, if different from name in setup.cfg
+  --version-file VERSION_FILE
+                        location of version to manipulate
+```
+
+In the current repo, it can be used without arguments. The manipulations are best 
+illustrated by this example:
+
+| situation                      | VERSION.txt | pypi.org | test.pypi.org | cli flags | new version |
+|--------------------------------|-------------|----------|---------------|-----------|-------------|
+| post-integration version 0.2.8 | 0.2.8       | 0.1.34   | 0.1.34rc4     | -t        | 0.2.8rc1    |
+| release new version 0.2.8      | 0.2.8       | 0.1.34   | 0.2.8rc1      |           | 0.2.8       |
+| normal post-integration        | 0.2.8       | 0.2.8    | 0.2.8rc1      | -t        | 0.2.9rc1    |
+| second post-integration        | 0.2.8       | 0.2.8    | 0.2.9rc1      | -t        | 0.2.9rc2    |
+| normal release                 | 0.2.8       | 0.2.8    | 0.2.9rc1      |           | 0.2.9       |
+| re-run of release              | 0.2.8       | 0.2.9    | 0.2.9rc1      |           | 0.2.10      |
+
