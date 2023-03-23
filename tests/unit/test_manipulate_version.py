@@ -1,10 +1,11 @@
 import unittest
 
-from spetlrtools.manipulate_version import (
-    _decide_next_version,
-    InvalidVersionManipulation,
-)
 from packaging.version import parse
+
+from spetlrtools.manipulate_version import (
+    InvalidVersionManipulation,
+    _decide_next_version,
+)
 
 
 class VersioningTest(unittest.TestCase):

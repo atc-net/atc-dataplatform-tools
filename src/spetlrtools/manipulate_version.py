@@ -1,12 +1,10 @@
 import argparse
 import configparser
-import json
 import sys
 from typing import IO
-from urllib.request import urlopen
 
 import requests
-from packaging.version import parse, Version
+from packaging.version import Version, parse
 
 
 def main():
