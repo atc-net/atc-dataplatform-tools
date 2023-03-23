@@ -1,4 +1,4 @@
-# Overview of atc-dataplatform-tools
+# Overview of spetlr-tools
 
 ## ValidateCamelCasedCols
 
@@ -10,7 +10,7 @@ The algorithm is simple, where the following must hold:
 ``` python
 from pyspark.sql.types import StructType, StructField, StringType
 from atc.spark import Spark
-from atc_tools.format.validate_camelcased_cols import validate_camelcased_cols
+from spetlrtools.format.validate_camelcased_cols import validate_camelcased_cols
 data1 = [
     (None,),
 ]
@@ -40,7 +40,7 @@ Be aware, that the schema extraction can be a slow process, so it is not recomme
 or read the schema from a target table - and use that for decode the Body.*
 
 ``` python
-from atc_tools.helpers.ExtractEncodedBody import ExtractEncodedBody
+from spetlrtools.helpers.ExtractEncodedBody import ExtractEncodedBody
 
 # EventHub dataframe 
 df_encodedbody.show()
@@ -89,7 +89,7 @@ Consider the following project:
 The modules `dataplatform.foo.main` and `dataplatform.bar.sub` can be retrieved using the `get_modules()` method (if either module had any submodules those would be retrieved as well):
 
 ```python
-from atc_tools.helpers import ModuleHelper
+from spetlrtools.helpers import ModuleHelper
 
 denmark_modules = ModuleHelper.get_modules(
     package="dataplatform",
@@ -134,7 +134,7 @@ We have that `/main.py` defines a `class A`. And `class B` and `class C` are sub
 Using the `get_classes_of_type()` method from the `ModuleHelper` all definitions of `class A` can be retrieved together with its subclasses `class B` and `class C` (and not `class D`):
 
 ```python
-from atc_tools.helpers import ModuleHelper
+from spetlrtools.helpers import ModuleHelper
 from dataplatform.foo.main import A
 
 classes_and_subclasses_of_type_A = ModuleHelper.get_classes_of_type(
@@ -155,7 +155,7 @@ The above returns a dictionary, where the keys point to the location of the clas
 
 The `get_classes_of_type()` method is configurable such that only classes of the `obj` type is returned and not its subclasses:
 ```python
-from atc_tools.helpers import ModuleHelper
+from spetlrtools.helpers import ModuleHelper
 from dataplatform.foo.main import A
 
 only_main_classes_of_type_A = ModuleHelper.get_classes_of_type(
@@ -175,7 +175,7 @@ The above returns:
 Or it can be configured to only return subclasses:
 
 ```python
-from atc_tools.helpers import ModuleHelper
+from spetlrtools.helpers import ModuleHelper
 from dataplatform.foo.main import A
 
 only_main_classes_of_type_A = ModuleHelper.get_classes_of_type(
@@ -239,7 +239,7 @@ class Second(TaskEntryPoint):
 Now, by utilizing the `get_all_task_entry_points()` method all the `task()` class methods can automatically be discovered as entry points:
 
 ```python
-from atc_tools.entry_points import TaskEntryPointHelper
+from spetlrtools.entry_points import TaskEntryPointHelper
 
 TaskEntryPointHelper.get_all_task_entry_points(
     packages=["dataplatform.foo", "dataplatform.bar"],
@@ -249,7 +249,7 @@ TaskEntryPointHelper.get_all_task_entry_points(
 This returns a dictionary:
 ```python
 {
-    "atc_tools.task_entry_points": [
+    "spetlrtools.task_entry_points": [
         "dataplatform.foo.main.First = dataplatform.foo.main:First.task",
         "dataplatform.bar.sub.Second = dataplatform.bar.sub:Second.task",
     ],
@@ -261,7 +261,7 @@ The developer can add this key-value pair to their setup of their package. When 
 If the developer wants to see the entry points, a path to a txt file can be added when executing the method:
 
 ```python
-from atc_tools.entry_points import TaskEntryPointHelper
+from spetlrtools.entry_points import TaskEntryPointHelper
 
 TaskEntryPointHelper.get_all_task_entry_points(
     packages=["dataplatform.foo", "dataplatform.bar"],
@@ -283,7 +283,7 @@ The `get_all_task_entry_points()` method is tied closely with the atc-dataplatfo
 
 ```python
 from abc import ABC, abstractmethod
-from atc_tools.entry_points import TaskEntryPointHelper
+from spetlrtools.entry_points import TaskEntryPointHelper
 
 class OtherBaseClass(ABC):
     @classmethod

@@ -15,6 +15,6 @@ Required input:
 
 """
 
-# from atc_tools.az_databricks_token.main import main
-# from atc_tools.az_databricks_token.server import LocalRequestHandler
+# from spetlrtools.az_databricks_token.main import main
+# from spetlrtools.az_databricks_token.server import LocalRequestHandler
 #

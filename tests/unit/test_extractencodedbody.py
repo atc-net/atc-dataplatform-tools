@@ -13,7 +13,7 @@ from pyspark.sql.types import (
     StructType,
 )
 
-from atc_tools.helpers.ExtractEncodedBody import ExtractEncodedBody
+from spetlrtools.helpers.ExtractEncodedBody import ExtractEncodedBody
 
 
 class ExtractEncodedBodyTest(unittest.TestCase):

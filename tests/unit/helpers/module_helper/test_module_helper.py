@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from atc_tools.helpers import ModuleHelper
+from spetlrtools.helpers import ModuleHelper
 
 
 class DummyType:

@@ -3,7 +3,7 @@ import sys
 import unittest
 from abc import ABC, abstractmethod
 
-from atc_tools.entry_points import TaskEntryPointHelper
+from spetlrtools.entry_points import TaskEntryPointHelper
 
 
 class TestModuleHelper(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestModuleHelper(unittest.TestCase):
         )
 
         expected_output = {
-            "atc_tools.task_entry_points": [
+            "spetlrtools.task_entry_points": [
                 f"{self.test_path_1}.foo.A = " + f"{self.test_path_1}.foo:A.task",
                 f"{self.test_path_1}.submodule.bar.B = "
                 + f"{self.test_path_1}.submodule.bar:B.task",
@@ -70,7 +70,7 @@ class TestModuleHelper(unittest.TestCase):
         )
 
         expected_output = {
-            "atc_tools.task_entry_points": [
+            "spetlrtools.task_entry_points": [
                 f"{self.test_path_2}.foo.A = {self.test_path_2}.foo:A.task",
                 f"{self.test_path_2}.foo.B = {self.test_path_2}.foo:B.task",
             ]
@@ -97,7 +97,7 @@ class TestModuleHelper(unittest.TestCase):
         )
 
         expected_output = {
-            "atc_tools.task_entry_points": [
+            "spetlrtools.task_entry_points": [
                 f"{self.test_path_2}.foo.A = {self.test_path_2}.foo:A.task",
                 f"{self.test_path_2}.foo.B = {self.test_path_2}.foo:B.task",
                 f"{self.test_path_2}.foo.C = {self.test_path_2}.foo:C.task",
