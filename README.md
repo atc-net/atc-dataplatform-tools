@@ -1,4 +1,5 @@
-# spetlr-tools
-A common set of tools for working with dataplatforms.
-These libraries contain test fixtures and development tools 
-that are not part of the runtime tools in atc-dataplatform.
+# WE MOVED!
+
+This library is actively maintained, just not under this name.
+
+Please find us at our new home: [spetlr-tools](https://github.com/spetlr-org/spetlr-tools)
